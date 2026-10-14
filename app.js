@@ -282,11 +282,36 @@ const sculk = (() => {
   const canvas=$('#sculk-field');
   let ctx=null,width=0,height=0,band=null,layer=null,motes=[],waves=[],growStart=0,raf=0,lastFrame=0,lastDraw=0;
   let soul=CYAN.slice(),soulGoal=CYAN,tintFrom=CYAN.slice(),tintStart=0;
+  let soulClock=performance.now();
   let mouseX=-1e4,mouseY=-1e4,targetX=0,targetY=0,springX=0,springY=0,velocityX=0,velocityY=0;
+  // The radar has its own mass: delayed input, with velocity retained when the pointer changes direction.
+  const radarLag=180,radarInputs=[];
+  let radarX=0,radarY=0,radarVelocityX=0,radarVelocityY=0,radarTargetX=0,radarTargetY=0;
+  function resetParallax() {
+    targetX=targetY=springX=springY=velocityX=velocityY=0;
+    radarX=radarY=radarVelocityX=radarVelocityY=radarTargetX=radarTargetY=0;
+    radarInputs.length=0;media.style.transform='';ring.style.transform='';
+  }
+  function moveRadar(time,dt) {
+    const pending=radarInputs[radarInputs.length-1];
+    if(targetX!==(pending?.x??radarTargetX)||targetY!==(pending?.y??radarTargetY)) {
+      radarInputs.push({time,x:targetX,y:targetY});
+    }
+    while(radarInputs.length&&radarInputs[0].time<=time-radarLag) {
+      const input=radarInputs.shift();radarTargetX=input.x;radarTargetY=input.y;
+    }
+    const moving=Math.abs(radarTargetX-radarX)+Math.abs(radarTargetY-radarY)+Math.abs(radarVelocityX)+Math.abs(radarVelocityY)>.0005;
+    if(!moving)return;
+    radarVelocityX=(radarVelocityX+(radarTargetX-radarX)*.006*dt)*Math.pow(.91,dt);
+    radarVelocityY=(radarVelocityY+(radarTargetY-radarY)*.006*dt)*Math.pow(.91,dt);
+    radarX+=radarVelocityX*dt;radarY+=radarVelocityY*dt;
+    ring.style.transform='translate3d('+(radarX*24).toFixed(2)+'px,'+(radarY*16).toFixed(2)+'px,0)';
+  }
   function resize() {
     const w=hero.clientWidth,h=hero.clientHeight;
     if(!w||(w===width&&h===height))return;
     width=w;height=h;
+    if(width<=680||!finePointer.matches||reduced.matches)resetParallax();
     let dpr;({context:ctx,dpr}=prepareCanvas(canvas,width,height));
     const size=width<700?5:6;
     band=growBand(width,width<700?9:12,size,1937);
@@ -321,7 +346,7 @@ const sculk = (() => {
     for(const soul of band.souls) {
       if(!visible(soul.c,soul.r))continue;
       const x=soul.c*size,y=height-(soul.r+1)*size;
-      let glow=still?soul.seed*.5:Math.pow(Math.max(0,Math.sin(time*soul.speed+soul.phase)),6)*.85;
+      let glow=still?soul.seed*.5:Math.pow(Math.max(0,Math.sin(soulClock*soul.speed+soul.phase)),6)*.85;
       glow+=Math.max(0,1-Math.hypot(mouseX-x,mouseY-y)/160)*.8;
       for(const wave of waves) {
         const age=(time-wave.t)/1000;if(age<0)continue;
@@ -352,8 +377,12 @@ const sculk = (() => {
   }
   function frame(time) {
     raf=0;
-    if(!inView||document.hidden||reduced.matches)return;
-    const dt=lastFrame?Math.min((time-lastFrame)/16.667,2):1;lastFrame=time;
+    if(reduced.matches){resetParallax();draw(time,true);return;}
+    if(!inView||document.hidden)return;
+    const elapsed=lastFrame?time-lastFrame:16.667;
+    const dt=Math.min(elapsed/16.667,2);lastFrame=time;
+    // Advance the pulse phase continuously so changing tempo never jumps the lights.
+    soulClock+=elapsed*(infectedGlow?1.75:1);
     if(finePointer.matches&&width>680) {
       const moving=Math.abs(targetX-springX)+Math.abs(targetY-springY)+Math.abs(velocityX)+Math.abs(velocityY)>.0005;
       if(moving) {
@@ -361,8 +390,8 @@ const sculk = (() => {
         velocityY=(velocityY+(targetY-springY)*.06*dt)*Math.pow(.8,dt);
         springX+=velocityX*dt;springY+=velocityY*dt;
         media.style.transform='translate3d('+(springX*-10).toFixed(2)+'px,'+(springY*-7).toFixed(2)+'px,0)';
-        ring.style.transform='translate3d('+(springX*16).toFixed(2)+'px,'+(springY*11).toFixed(2)+'px,0)';
       }
+      moveRadar(time,dt);
     }
     if(time-lastDraw>(width<700?50:33)){draw(time);lastDraw=time;}
     raf=requestAnimationFrame(frame);
@@ -370,8 +399,12 @@ const sculk = (() => {
   function sync() {
     if(raf)cancelAnimationFrame(raf);raf=0;lastFrame=0;
     if(inView&&!document.hidden&&!reduced.matches)raf=requestAnimationFrame(frame);
-    else if(reduced.matches)draw(performance.now(),true);
+    else {
+      radarInputs.length=0;radarTargetX=targetX;radarTargetY=targetY;
+      if(reduced.matches){resetParallax();draw(performance.now(),true);}
+    }
   }
+  finePointer.addEventListener('change',() => {if(!finePointer.matches)resetParallax();});
   hero.addEventListener('pointermove',(event) => {
     if(event.pointerType!=='mouse'||reduced.matches)return;
     const rect=hero.getBoundingClientRect();mouseX=event.clientX-rect.left;mouseY=event.clientY-rect.top;
@@ -439,17 +472,17 @@ function settleRing() {
   fitFrames();ring.style.transition='none';placeRing();ring.getBoundingClientRect();ring.style.transition='';
 }
 if('ResizeObserver' in window) {
-  new ResizeObserver(() => {sculk.resize();fitFrames();placeRing();}).observe(hero);
+  new ResizeObserver(() => {sculk.resize();settleRing();}).observe(hero);
   new ResizeObserver(() => floor.resize()).observe($('#sculk-floor'));
 } else {
-  window.addEventListener('resize',() => {sculk.resize();fitFrames();placeRing();floor.resize();},{passive:true});
+  window.addEventListener('resize',() => {sculk.resize();settleRing();floor.resize();},{passive:true});
 }
 if('IntersectionObserver' in window) {
   new IntersectionObserver((entries)=>{inView=entries[0].isIntersecting;syncClock();sculk.sync();},{threshold:0}).observe(hero);
   new IntersectionObserver((entries)=>floor.show(entries[0].isIntersecting),{threshold:.25}).observe($('#sculk-floor'));
 }
 document.addEventListener('visibilitychange',()=>{syncClock();sculk.sync();});
-reduced.addEventListener('change',()=>{if(reduced.matches){paused=true;resetClock();document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());}sculk.sync();});
+reduced.addEventListener('change',()=>{sculk.sync();if(reduced.matches){paused=true;resetClock();document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());}});
 settleRing();sculk.resize();floor.resize();resetClock();sculk.sync();
 
 // Hold the hero copy until the intro runs, so the fallback font never flashes before the flicker.

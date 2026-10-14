@@ -123,6 +123,7 @@ ul{padding:0;list-style:none}
 .site-header nav a:hover::after,.text-link:hover::after{transform:scaleX(1)}
 .header-status{display:flex;align-items:center;gap:10px;font-family:var(--tech);font-size:12px;letter-spacing:.14em;color:var(--mute)}
 .header-status .led{--c:var(--sculk)}
+body.infected .header-status .led{animation-duration:1.6s}
 .signal-meter{display:inline-flex;align-items:flex-end;gap:2px;height:10px;margin-right:2px}
 .signal-meter span{display:block;width:2px;background:var(--sculk);border-radius:1px;animation:wave-bar 1.2s ease-in-out infinite alternate}
 .signal-meter span:nth-child(1){height:35%;animation-delay:.1s}
@@ -147,7 +148,7 @@ ul{padding:0;list-style:none}
 .lab-grid{position:absolute;inset:0;z-index:-3;pointer-events:none;background:linear-gradient(90deg,color-mix(in srgb,var(--edge) 6%,transparent) 1px,transparent 1px) var(--pad) 0/96px 96px,linear-gradient(color-mix(in srgb,var(--edge) 6%,transparent) 1px,transparent 1px) 0 0/96px 96px;-webkit-mask-image:linear-gradient(90deg,#000 0,rgba(0,0,0,.5) 36%,transparent 58%);mask-image:linear-gradient(90deg,#000 0,rgba(0,0,0,.5) 36%,transparent 58%)}
 
 /* Rhine-style tracking ring; JS places it over the subject of the active artwork. */
-.lab-ring{--ring-size:clamp(360px,42vw,640px);position:absolute;z-index:-2;left:var(--ring-x);top:var(--ring-y);width:var(--ring-size);height:var(--ring-size);margin:calc(var(--ring-size)/-2) 0 0 calc(var(--ring-size)/-2);transition:left 1.5s var(--ease),top 1.5s var(--ease);pointer-events:none}
+.lab-ring{--ring-size:clamp(360px,42vw,640px);position:absolute;z-index:-2;left:var(--ring-x);top:var(--ring-y);width:var(--ring-size);height:var(--ring-size);margin:calc(var(--ring-size)/-2) 0 0 calc(var(--ring-size)/-2);transition:left 3.6s cubic-bezier(.55,0,.2,1) .18s,top 3.6s cubic-bezier(.55,0,.2,1) .18s;pointer-events:none}
 .lab-ring svg{display:block;width:100%;height:100%;overflow:visible}
 .lab-ring circle,.lab-ring path,.lab-ring rect{fill:none}
 .rl{stroke:rgba(226,236,242,.3);stroke-width:.8}
@@ -162,8 +163,8 @@ ul{padding:0;list-style:none}
 .rl-cross{stroke:rgba(226,236,242,.4);stroke-width:.8}
 .rl-reticle{stroke:var(--glow);stroke-width:1.2;transition:stroke 1s}
 .ring-outer,.ring-inner{transform-box:view-box;transform-origin:50% 50%}
-.ring-outer{transform:rotate(var(--orbit-turn));transition:transform 2.2s cubic-bezier(.25,1.1,.25,1)}
-.ring-inner{transform:rotate(calc(var(--orbit-turn)*-1.3));transition:transform 2.8s var(--ease)}
+.ring-outer{transform:rotate(var(--orbit-turn));transition:transform 4.4s cubic-bezier(.6,0,.18,1.1) .24s}
+.ring-inner{transform:rotate(calc(var(--orbit-turn)*-1.3));transition:transform 5.2s cubic-bezier(.6,0,.18,1.06) .32s}
 .ring-label{position:absolute;top:50%;right:calc(100% + 34px);transform:translateY(-50%);display:grid;justify-items:end;gap:6px;font-family:var(--tech);font-size:11px;letter-spacing:.22em;color:var(--paper-2);white-space:nowrap}
 .ring-label b{font-weight:600;color:var(--ink);transition:color 1s}
 .ring-coords{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--mute)}
@@ -448,6 +449,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .lab-ring,.ring-outer,.ring-inner{transition-delay:0s!important}
   .hero-frame img{transform:scale(var(--zoom,1))!important}
   .reveal-item{opacity:1!important;transform:none!important}
   .laser-scanner{display:none!important}
