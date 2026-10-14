@@ -18,6 +18,33 @@ const bars = $$('.mode-progress i');
 const modeOptions = $('.mode-options');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(pointer:fine)');
+// Start with the title's post-flicker recolor, then linearly ramp both pulse clocks over 1.3s.
+const pulseTempo = (() => {
+  const duration=1300;
+  let from=1,to=1,started=0,raf=0;
+  const at=(time=performance.now()) => from+(to-from)*Math.max(0,Math.min(1,(time-started)/duration));
+  function sync(time=performance.now()) {
+    if(reduced.matches){from=to;if(raf)cancelAnimationFrame(raf);raf=0;}
+    const animation=$('.header-status .led')?.getAnimations().find(item=>item.animationName==='led-pulse');
+    // Updating playback rate keeps the LED's current phase; changing duration would jump it.
+    if(animation)animation.updatePlaybackRate(at(time));
+  }
+  function frame(time) {
+    raf=0;sync(time);
+    if(!reduced.matches&&time<started+duration)raf=requestAnimationFrame(frame);
+  }
+  return {
+    at,sync,
+    set(infected) {
+      const target=infected?1.75:1;
+      if(target===to)return;
+      const time=performance.now();from=at(time);to=target;started=time;
+      if(raf)cancelAnimationFrame(raf);raf=0;
+      sync(time);
+      if(!reduced.matches&&from!==to)raf=requestAnimationFrame(frame);
+    },
+  };
+})();
 const cycleDuration = 8000;
 let current = 0;
 let paused = reduced.matches;
@@ -312,6 +339,7 @@ const sculk = (() => {
     if(!w||(w===width&&h===height))return;
     width=w;height=h;
     if(width<=680||!finePointer.matches||reduced.matches)resetParallax();
+    pulseTempo.sync();
     let dpr;({context:ctx,dpr}=prepareCanvas(canvas,width,height));
     const size=width<700?5:6;
     band=growBand(width,width<700?9:12,size,1937);
@@ -379,10 +407,10 @@ const sculk = (() => {
     raf=0;
     if(reduced.matches){resetParallax();draw(time,true);return;}
     if(!inView||document.hidden)return;
-    const elapsed=lastFrame?time-lastFrame:16.667;
+    const previous=lastFrame||time-16.667,elapsed=time-previous;
     const dt=Math.min(elapsed/16.667,2);lastFrame=time;
     // Advance the pulse phase continuously so changing tempo never jumps the lights.
-    soulClock+=elapsed*(infectedGlow?1.75:1);
+    soulClock+=elapsed*(pulseTempo.at(previous)+pulseTempo.at(time))*.5;
     if(finePointer.matches&&width>680) {
       const moving=Math.abs(targetX-springX)+Math.abs(targetY-springY)+Math.abs(velocityX)+Math.abs(velocityY)>.0005;
       if(moving) {
@@ -416,7 +444,7 @@ const sculk = (() => {
     grow() {growStart=performance.now();},
     vibrate(x,y,delay=0) {if(waves.length<6)waves.push({x,y,t:performance.now()+delay});},
     tint(infected) {
-      if(infectedGlow!==infected) {infectedGlow=infected;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
+      if(infectedGlow!==infected) {pulseTempo.set(infected);infectedGlow=infected;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
       if(reduced.matches||!inView)draw(performance.now(),true);
     },
   };
@@ -481,8 +509,8 @@ if('IntersectionObserver' in window) {
   new IntersectionObserver((entries)=>{inView=entries[0].isIntersecting;syncClock();sculk.sync();},{threshold:0}).observe(hero);
   new IntersectionObserver((entries)=>floor.show(entries[0].isIntersecting),{threshold:.25}).observe($('#sculk-floor'));
 }
-document.addEventListener('visibilitychange',()=>{syncClock();sculk.sync();});
-reduced.addEventListener('change',()=>{sculk.sync();if(reduced.matches){paused=true;resetClock();document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());}});
+document.addEventListener('visibilitychange',()=>{pulseTempo.sync();syncClock();sculk.sync();});
+reduced.addEventListener('change',()=>{pulseTempo.sync();sculk.sync();if(reduced.matches){paused=true;resetClock();document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());}});
 settleRing();sculk.resize();floor.resize();resetClock();sculk.sync();
 
 // Hold the hero copy until the intro runs, so the fallback font never flashes before the flicker.

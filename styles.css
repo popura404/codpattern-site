@@ -123,7 +123,6 @@ ul{padding:0;list-style:none}
 .site-header nav a:hover::after,.text-link:hover::after{transform:scaleX(1)}
 .header-status{display:flex;align-items:center;gap:10px;font-family:var(--tech);font-size:12px;letter-spacing:.14em;color:var(--mute)}
 .header-status .led{--c:var(--sculk)}
-body.infected .header-status .led{animation-duration:1.6s}
 .signal-meter{display:inline-flex;align-items:flex-end;gap:2px;height:10px;margin-right:2px}
 .signal-meter span{display:block;width:2px;background:var(--sculk);border-radius:1px;animation:wave-bar 1.2s ease-in-out infinite alternate}
 .signal-meter span:nth-child(1){height:35%;animation-delay:.1s}
