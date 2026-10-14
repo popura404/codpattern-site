@@ -314,6 +314,32 @@ const sculk = (() => {
   // The radar has its own mass: delayed input, with velocity retained when the pointer changes direction.
   const radarLag=180,radarInputs=[];
   let radarX=0,radarY=0,radarVelocityX=0,radarVelocityY=0,radarTargetX=0,radarTargetY=0;
+  let scanAngle=0,scanVelocity=0,scanTarget=0,scanDelay=0;
+  function resetScan() {
+    scanAngle=scanVelocity=scanTarget=0;scanDelay=infectedGlow?240:0;
+    ring.style.removeProperty('--radar-scan');
+  }
+  function scanRadar(elapsed,dt) {
+    if(dialog.open)return;
+    if(infectedGlow) {
+      scanDelay-=elapsed;
+      if(scanDelay<=0) {
+        const step=55+Math.random()*70,direction=Math.random()<.5?-1:1;
+        let next=scanTarget+direction*step;
+        if(Math.abs(next)>140)next=scanTarget-direction*step;
+        scanTarget=next;scanDelay=4000+Math.random()*2200;
+      }
+    }
+    const moving=Math.abs(scanTarget-scanAngle)+Math.abs(scanVelocity)>.005;
+    if(!moving) {
+      if(!infectedGlow)resetScan();
+      return;
+    }
+    // Rotate the SVG layers separately from mode positioning and mouse parallax.
+    scanVelocity=(scanVelocity+(scanTarget-scanAngle)*.0038*dt)*Math.pow(.93,dt);
+    scanAngle+=scanVelocity*dt;
+    ring.style.setProperty('--radar-scan',scanAngle.toFixed(3)+'deg');
+  }
   function resetParallax() {
     targetX=targetY=springX=springY=velocityX=velocityY=0;
     radarX=radarY=radarVelocityX=radarVelocityY=radarTargetX=radarTargetY=0;
@@ -405,12 +431,13 @@ const sculk = (() => {
   }
   function frame(time) {
     raf=0;
-    if(reduced.matches){resetParallax();draw(time,true);return;}
+    if(reduced.matches){resetParallax();resetScan();draw(time,true);return;}
     if(!inView||document.hidden)return;
     const previous=lastFrame||time-16.667,elapsed=time-previous;
     const dt=Math.min(elapsed/16.667,2);lastFrame=time;
     // Advance the pulse phase continuously so changing tempo never jumps the lights.
     soulClock+=elapsed*(pulseTempo.at(previous)+pulseTempo.at(time))*.5;
+    scanRadar(elapsed,dt);
     if(finePointer.matches&&width>680) {
       const moving=Math.abs(targetX-springX)+Math.abs(targetY-springY)+Math.abs(velocityX)+Math.abs(velocityY)>.0005;
       if(moving) {
@@ -429,7 +456,7 @@ const sculk = (() => {
     if(inView&&!document.hidden&&!reduced.matches)raf=requestAnimationFrame(frame);
     else {
       radarInputs.length=0;radarTargetX=targetX;radarTargetY=targetY;
-      if(reduced.matches){resetParallax();draw(performance.now(),true);}
+      if(reduced.matches){resetParallax();resetScan();draw(performance.now(),true);}
     }
   }
   finePointer.addEventListener('change',() => {if(!finePointer.matches)resetParallax();});
@@ -444,7 +471,7 @@ const sculk = (() => {
     grow() {growStart=performance.now();},
     vibrate(x,y,delay=0) {if(waves.length<6)waves.push({x,y,t:performance.now()+delay});},
     tint(infected) {
-      if(infectedGlow!==infected) {pulseTempo.set(infected);infectedGlow=infected;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
+      if(infectedGlow!==infected) {pulseTempo.set(infected);infectedGlow=infected;scanTarget=0;scanDelay=infected?240:0;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
       if(reduced.matches||!inView)draw(performance.now(),true);
     },
   };

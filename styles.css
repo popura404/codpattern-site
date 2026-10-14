@@ -162,8 +162,8 @@ ul{padding:0;list-style:none}
 .rl-cross{stroke:rgba(226,236,242,.4);stroke-width:.8}
 .rl-reticle{stroke:var(--glow);stroke-width:1.2;transition:stroke 1s}
 .ring-outer,.ring-inner{transform-box:view-box;transform-origin:50% 50%}
-.ring-outer{transform:rotate(var(--orbit-turn));transition:transform 4.4s cubic-bezier(.6,0,.18,1.1) .24s}
-.ring-inner{transform:rotate(calc(var(--orbit-turn)*-1.3));transition:transform 5.2s cubic-bezier(.6,0,.18,1.06) .32s}
+.ring-outer{rotate:var(--radar-scan,0deg);transform:rotate(var(--orbit-turn));transition:transform 4.4s cubic-bezier(.6,0,.18,1.1) .24s}
+.ring-inner{rotate:calc(var(--radar-scan,0deg)*-.8);transform:rotate(calc(var(--orbit-turn)*-1.3));transition:transform 5.2s cubic-bezier(.6,0,.18,1.06) .32s}
 .ring-label{position:absolute;top:50%;right:calc(100% + 34px);transform:translateY(-50%);display:grid;justify-items:end;gap:6px;font-family:var(--tech);font-size:11px;letter-spacing:.22em;color:var(--paper-2);white-space:nowrap}
 .ring-label b{font-weight:600;color:var(--ink);transition:color 1s}
 .ring-coords{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--mute)}
@@ -449,6 +449,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .lab-ring,.ring-outer,.ring-inner{transition-delay:0s!important}
+  .ring-outer,.ring-inner{rotate:none!important}
   .hero-frame img{transform:scale(var(--zoom,1))!important}
   .reveal-item{opacity:1!important;transform:none!important}
   .laser-scanner{display:none!important}
