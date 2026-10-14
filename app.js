@@ -336,7 +336,7 @@ const sculk = (() => {
       return;
     }
     // Rotate the SVG layers separately from mode positioning and mouse parallax.
-    scanVelocity=(scanVelocity+(scanTarget-scanAngle)*.0038*dt)*Math.pow(.93,dt);
+    scanVelocity=(scanVelocity+(scanTarget-scanAngle)*.005*dt)*Math.pow(.91,dt);
     scanAngle+=scanVelocity*dt;
     ring.style.setProperty('--radar-scan',scanAngle.toFixed(3)+'deg');
   }
