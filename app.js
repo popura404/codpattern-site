@@ -324,10 +324,10 @@ const sculk = (() => {
     if(infectedGlow) {
       scanDelay-=elapsed;
       if(scanDelay<=0) {
-        const step=22+Math.random()*30,direction=Math.random()<.5?-1:1;
+        const step=12+Math.random()*16,direction=Math.random()<.5?-1:1;
         let next=scanTarget+direction*step;
-        if(Math.abs(next)>85)next=scanTarget-direction*step;
-        scanTarget=next;scanDelay=1800+Math.random()*1200;
+        if(Math.abs(next)>55)next=scanTarget-direction*step;
+        scanTarget=next;scanDelay=900+Math.random()*700;
       }
     }
     const moving=Math.abs(scanTarget-scanAngle)+Math.abs(scanVelocity)>.005;
