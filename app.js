@@ -133,6 +133,8 @@ function placeRing() {
   return {x,y};
 }
 function updateRecord(mode) {
+  const specs = $('.record-specs');
+  specs?.classList.add('is-refreshing');
   $('#record-image').src=mode.image;
   $('#record-image').alt=mode.title+'完整画面';
   $('#record-image').style.opacity='1';
@@ -146,6 +148,7 @@ function updateRecord(mode) {
   $('#record-mechanic').textContent=mode.mechanic;
   $('#mechanic-label').textContent=mode.mechanicLabel;
   $('#record-goal').textContent=mode.goal;
+  setTimeout(() => specs?.classList.remove('is-refreshing'), 200);
 }
 async function selectMode(index, manual=false) {
   if(index<0 || index>=MODES.length) return;
@@ -171,7 +174,15 @@ async function selectMode(index, manual=false) {
   modeOptions.style.setProperty('--index',index);
   showWord(mode.display);
   const target=placeRing();
-  if(!reduced.matches&&target) sculk.vibrate(target.x,target.y,900);
+  if(!reduced.matches&&target) {
+    sculk.vibrate(target.x,target.y,900);
+    setTimeout(() => sculk.vibrate(target.x+15,target.y+10,0), 120);
+  }
+  const recordVisual = $('.record-visual');
+  if(recordVisual && !reduced.matches) {
+    recordVisual.classList.add('is-scanning');
+    setTimeout(() => recordVisual.classList.remove('is-scanning'), 1800);
+  }
   clearTimeout(recordTimer);
   $('#record-image').style.opacity='.3';
   recordTimer=setTimeout(() => updateRecord(mode),reduced.matches ? 0 : 200);
@@ -214,6 +225,9 @@ $('#close-visual').addEventListener('click',() => dialog.close());
 dialog.addEventListener('click',(event) => {if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 dialog.addEventListener('close',() => {document.body.classList.remove('dialog-open');syncClock();});
 $('#copy-environment').addEventListener('click',async() => {
+  const btn = $('#copy-environment');
+  btn.classList.add('copied');
+  setTimeout(() => btn.classList.remove('copied'), 600);
   const content='COD Pattern 作战环境\nMinecraft 1.20.1\nJava 17\nForge 47+（项目构建版本 47.4.0）\nTaCZ 1.1.6+\nCOD Pattern 主模组\n可选：COD Pattern Zombies 独立附属\n客户端与服务端保持对应模组一致。';
   const legacyCopy=() => {const input=document.createElement('textarea');input.value=content;input.style.cssText='position:fixed;opacity:0';document.body.append(input);input.select();const success=document.execCommand('copy');input.remove();if(!success)throw new Error('Clipboard unavailable');};
   try {
@@ -455,3 +469,35 @@ function intro() {
 Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1800))]).then(intro);
 const idle=window.requestIdleCallback||((callback)=>setTimeout(callback,800));
 idle(()=>{loadFrame(1).catch(()=>{});loadFrame(2).catch(()=>{});},{timeout:1800});
+
+// Tactical HUD scroll reveal
+if('IntersectionObserver' in window && !reduced.matches) {
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if(entry.isIntersecting) {
+        entry.target.classList.add('is-revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  $$('.reveal-item').forEach((el) => revealObserver.observe(el));
+} else {
+  $$('.reveal-item').forEach((el) => el.classList.add('is-revealed'));
+}
+
+// Tactical subtle parallax tilt on artwork
+const visualCard = $('.record-visual');
+if(finePointer.matches && visualCard) {
+  visualCard.addEventListener('pointermove', (e) => {
+    if(reduced.matches) return;
+    const rect = visualCard.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const img = visualCard.querySelector('img');
+    if(img) img.style.transform = `scale(1.045) translate3d(${(x * 14).toFixed(1)}px, ${(y * 10).toFixed(1)}px, 0)`;
+  });
+  visualCard.addEventListener('pointerleave', () => {
+    const img = visualCard.querySelector('img');
+    if(img) img.style.transform = '';
+  });
+}

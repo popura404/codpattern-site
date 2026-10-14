@@ -20,7 +20,7 @@
       <span class="brand-word">COD<span class="brand-colon">:</span>PATTERN<small>Regression · 回归</small></span>
     </a>
     <nav aria-label="主导航"><a href="#modes">选择战场</a><a href="#field">作战档案</a><a href="#world">世界记录</a><a href="#deployment">部署须知</a></nav>
-    <span class="header-status"><i class="led" aria-hidden="true"></i>MC 1.20.1</span>
+    <span class="header-status"><span class="signal-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></span><i class="led" aria-hidden="true"></i>MC 1.20.1</span>
     <a class="header-action key key-light" href="#modes">选择战场<span aria-hidden="true">＋</span></a>
   </header>
   <main>
@@ -71,15 +71,16 @@
       </div>
     </section>
     <section class="field-section section" id="field" aria-labelledby="field-title">
-      <header class="section-heading">
+      <header class="section-heading reveal-item">
         <div><p class="section-index"><b>02</b>作战档案</p><h2 id="field-title">研判战局<br>选择行动</h2></div>
         <p class="record-count" aria-hidden="true"><b id="record-count">01</b>/03</p>
       </header>
-      <article class="record" id="operation-record">
+      <article class="record reveal-item" id="operation-record">
         <div class="record-frame">
           <button type="button" class="record-visual record-open" aria-label="查看作战档案完整原画" aria-haspopup="dialog">
             <img id="record-image" src="assets/frontline_preview.webp" width="2560" height="1440" alt="冲锋团队竞技原画" loading="lazy" decoding="async">
             <span class="corner-marks" aria-hidden="true"></span>
+            <span class="laser-scanner" aria-hidden="true"></span>
             <span class="original-button" aria-hidden="true"><span class="expand-icon"></span></span>
           </button>
           <div class="record-body">
@@ -92,21 +93,21 @@
           </div>
         </div>
       </article>
-      <ul class="feature-strip">
+      <ul class="feature-strip reveal-item">
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>装备预设</li>
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h6v6H3zM9 4h6v6H9zM15 10h6v6h-6zM6 20h12"/></svg>小队协作</li>
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>自定义战场</li>
       </ul>
     </section>
     <section class="world-section section" id="world" aria-labelledby="world-title">
-      <div class="world-heading">
+      <div class="world-heading reveal-item">
         <p class="section-index"><b>03</b>世界记录</p>
         <h2 id="world-title">记录仍在<br>归途未明</h2>
         <p class="world-intro">我们是回归，追索古老传说与异常规律的研究者。有人希望突破文明的边界，有人只想理解未知；共同的研究，曾让我们走到一起。</p>
         <p class="world-intro">灾变之后，联系与资源体系受损。有人封存资料，有人继续实验，也有人留在幸存者身边。本节点仍在整理记录，试着接续那些中断的消息。</p>
         <span class="world-signature"><i class="led" aria-hidden="true"></i>REGRESSION / 留存节点</span>
       </div>
-      <article class="dispatch" aria-label="僵尸模式世界观简报">
+      <article class="dispatch reveal-item" aria-label="僵尸模式世界观简报">
         <div class="dispatch-top"><span>PUBLIC RECORD / 001</span><span>僵尸模式</span></div>
         <dl class="dispatch-records">
           <div><dt><span>01</span>灾变</dt><dd>多地工业下界门相继故障，污染从设施中外泄。尸化与幽匿活动的报告接连传来，危机在不同地区同时扩大。门体为何失效、异常从何而来，我们仍缺少完整答案。</dd></div>
@@ -119,11 +120,11 @@
       </article>
     </section>
     <section class="deployment-section section" id="deployment" aria-labelledby="deploy-title">
-      <div class="deployment-heading">
+      <div class="deployment-heading reveal-item">
         <p class="section-index"><b>04</b>部署须知</p>
         <h2 id="deploy-title">确认装备<br>保持联络</h2>
       </div>
-      <div class="device">
+      <div class="device reveal-item">
         <div class="device-top"><span>ENVIRONMENT</span><span class="device-ready"><i class="led" aria-hidden="true"></i>MC / FORGE</span></div>
         <div class="lcd"><span class="lcd-label">MINECRAFT</span><strong>1.20.1</strong></div>
         <ul class="environment-specs"><li>Java 17</li><li>Forge 47+</li><li>TaCZ 1.1.6+</li></ul>
