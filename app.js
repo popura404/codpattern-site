@@ -36,7 +36,7 @@ const pulseTempo = (() => {
   return {
     at,sync,
     set(infected) {
-      const target=infected?1.75:1;
+      const target=infected?2.5:1;
       if(target===to)return;
       const time=performance.now();from=at(time);to=target;started=time;
       if(raf)cancelAnimationFrame(raf);raf=0;
