@@ -2,9 +2,9 @@
 
 // focus is the subject of each artwork (fractions of the image); zoom mirrors --zoom in styles.css.
 const MODES = [
-  { id:'frontline', code:'FTL', display:'FRONTLINE', title:'冲锋团队竞技', image:'assets/frontline_preview.webp', original:'assets/frontline_preview_full.webp', type:'PVP', source:'REGRESSION / FTL', tagline:'守住阵线。向前推进。', brief:'从各自基地重返战场，与队友协同推进。击杀对手积累团队分数；阵亡后在己方基地复活，再次投入交锋。', combat:'团队对抗', mechanic:'固定基地', mechanicLabel:'复活', goal:'击杀得分', coords:'X 064 / Y -052 / Z 128', focus:[.67,.37], zoom:1 },
-  { id:'teamdeathmatch', code:'TDM', display:'TEAM DEATHMATCH', title:'战术团队竞技', image:'assets/team_death_match_preview.webp', original:'assets/team_death_match_preview_full.webp', type:'PVP', source:'REGRESSION / TDM', tagline:'观察局势。变换攻势。', brief:'复活位置随战场局势动态选择。灵活转移、协同交锋，以击杀积累团队分数，在不断变化的战况中争取优势。', combat:'团队对抗', mechanic:'动态选点', mechanicLabel:'复活', goal:'击杀得分', coords:'X -211 / Y -048 / Z 077', focus:[.6,.4], zoom:1 },
-  { id:'zombies', code:'ZMB', display:'ZOMBIES', title:'僵尸模式', image:'assets/zombies_preview.webp', original:'assets/zombies_preview_full.webp', type:'PVE', source:'REGRESSION / ZMB', tagline:'黑暗之中，彼此就是防线。', brief:'击杀与助攻积攒点数，补充火力。利用地图设施开启通路、恢复供电，和队友合力撑过下一波。', combat:'合作生存', mechanic:'波次推进', mechanicLabel:'机制', goal:'抵御尸潮', coords:'X 302 / Y -057 / Z -019', focus:[.46,.36], zoom:1.15 },
+  { id:'frontline', code:'FTL', display:'FRONTLINE', title:'冲锋团队竞技', image:'assets/frontline_preview.webp', original:'assets/frontline_preview_full.webp', type:'PVP', source:'REGRESSION / FTL', tagline:'守住阵线。向前推进。', brief:'以己方基地为稳固依托，与队友协同向前推进。消灭敌对目标积累团队积分；阵亡后重整防线快速返场，以密集攻势撕开对手战线。', combat:'团队对抗', mechanic:'固定基地', mechanicLabel:'复活', goal:'击杀得分', coords:'X 064 / Y -052 / Z 128', focus:[.67,.37], zoom:1 },
+  { id:'teamdeathmatch', code:'TDM', display:'TEAM DEATHMATCH', title:'战术团队竞技', image:'assets/team_death_match_preview.webp', original:'assets/team_death_match_preview_full.webp', type:'PVP', source:'REGRESSION / TDM', tagline:'观察局势。变换攻势。', brief:'没有固定的安全后方。复活点随战场态势动态演算，灵活转点穿插、协同清剿目标，在不断变换的遭遇战中夺取主动权。', combat:'团队对抗', mechanic:'动态选点', mechanicLabel:'复活', goal:'击杀得分', coords:'X -211 / Y -048 / Z 077', focus:[.6,.4], zoom:1 },
+  { id:'zombies', code:'ZMB', display:'ZOMBIES', title:'僵尸模式', image:'assets/zombies_preview.webp', original:'assets/zombies_preview_full.webp', type:'PVE', source:'REGRESSION / ZMB', tagline:'黑暗之中，彼此就是防线。', brief:'击杀与助攻积攒点数，解锁武器箱与神秘箱。重启区域供电、清除封锁通路，在无尽尸潮的围攻中与队友合力撑过下一波。', combat:'合作生存', mechanic:'波次推进', mechanicLabel:'机制', goal:'抵御尸潮', coords:'X 302 / Y -057 / Z -019', focus:[.46,.36], zoom:1.15 },
 ];
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -18,9 +18,17 @@ const bars = $$('.mode-progress i');
 const modeOptions = $('.mode-options');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(pointer:fine)');
+const modeTiming=Object.freeze({
+  flash:650*1.3,
+  fadeOut:100,
+  theme:parseFloat(getComputedStyle(document.body).getPropertyValue('--theme-duration')),
+  soul:2000,
+  echo:120,
+  radarWarmup:240,
+});
 // Start with the title's post-flicker recolor, then linearly ramp both pulse clocks over 1.3s.
 const pulseTempo = (() => {
-  const duration=1300;
+  const duration=modeTiming.theme;
   let from=1,to=1,started=0,raf=0;
   const at=(time=performance.now()) => from+(to-from)*Math.max(0,Math.min(1,(time-started)/duration));
   function sync(time=performance.now()) {
@@ -54,6 +62,7 @@ let changing = false;
 let requestId = 0;
 let clockAnimation = null;
 let wordToken = 0;
+let themeEchoTimer;
 let recordTimer;
 let touchStart;
 const loading = new Map();
@@ -77,50 +86,60 @@ function syncClock() {
 }
 function resetClock() {
   clockAnimation?.cancel();clockAnimation=null;
-  bars.forEach((bar,i) => {bar.style.transform = 'scaleX(' + (i === current && paused ? 1 : 0) + ')';});
+  bars.forEach((bar,i) => {bar.style.clipPath = i === current && paused ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)';});
   if(paused) return;
-  const animation = bars[current].animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:cycleDuration,fill:'forwards',easing:'linear'});
+  const animation = bars[current].animate([{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0% 0 0)'}],{duration:cycleDuration,fill:'forwards',easing:'linear'});
   clockAnimation=animation;
   animation.onfinish = () => {if(clockAnimation === animation && !paused) selectMode((current+1)%MODES.length);};
   syncClock();
 }
-// Headlines sputter on like a sculk sensor catching a signal, then the soul glow decays.
-const glow = (alpha) => '0 0 26px rgba(42,212,198,' + alpha + '),0 0 3px rgba(42,212,198,' + alpha + ')';
-const FLICKER_IN = [
-  {opacity:0,filter:'blur(5px)',textShadow:glow(0)},
-  {opacity:.8,filter:'blur(1.5px)',textShadow:glow(.9),offset:.06},
-  {opacity:.06,offset:.12},
-  {opacity:.6,offset:.18},
-  {opacity:.12,offset:.24},
-  {opacity:1,filter:'blur(0px)',textShadow:glow(.85),offset:.34},
-  {opacity:.4,offset:.41},
-  {opacity:1,textShadow:glow(.6),offset:.48},
-  {opacity:1,filter:'blur(0px)',textShadow:glow(0)},
-];
-const FLICKER_OUT = [{opacity:1},{opacity:.15,offset:.3},{opacity:.7,offset:.5},{opacity:0}];
-function flicker(element,options={}) {
-  return element.animate(FLICKER_IN,{duration:850,easing:'linear',fill:'backwards',...options});
+// Only changing mode words flash, using the newly selected mode's signal colour.
+const FLICKER_OUT = [{opacity:1},{opacity:0}];
+function flicker(element) {
+  const rgb=getComputedStyle(document.body).getPropertyValue('--accent-rgb').trim();
+  const restingColor=getComputedStyle(element).color;
+  const signal='rgb('+rgb+')';
+  const glow=(alpha)=>'0 0 3px rgba('+rgb+','+alpha*.8+'),0 0 24px rgba('+rgb+','+alpha*.65+'),0 0 48px rgba('+rgb+','+alpha*.35+')';
+  return element.animate([
+    {opacity:0,color:restingColor,textShadow:'none'},
+    {opacity:1,color:signal,textShadow:glow(.8),offset:.15},
+    {opacity:.75,color:signal,textShadow:glow(.5),offset:.24},
+    {opacity:1,color:signal,textShadow:glow(1),offset:.34},
+    {opacity:1,color:restingColor,textShadow:glow(.3),offset:.7},
+    {opacity:1,color:restingColor,textShadow:'none'},
+  ],{duration:modeTiming.flash,easing:'linear',fill:'backwards'});
 }
 // After the flicker settles, Zombies turns the word and the sculk glow to the mode's dark red.
-function settleGlow() {
+function settleGlow(withFeedback=false) {
   const infected=MODES[current].id==='zombies';
   document.body.classList.toggle('infected',infected);
   sculk.tint(infected);floor.tint(infected);
+  clearTimeout(themeEchoTimer);
+  if(withFeedback && !reduced.matches) {
+    const target=placeRing(),token=wordToken;
+    if(target) {
+      sculk.vibrate(target.x,target.y);
+      themeEchoTimer=setTimeout(()=>{
+        if(token===wordToken && !reduced.matches) sculk.vibrate(target.x+15,target.y+10);
+      },modeTiming.echo);
+    }
+  }
 }
 function showWord(text) {
   const element = $('#mode-display');
   const token = ++wordToken;
+  clearTimeout(themeEchoTimer);
   element.getAnimations().forEach((animation) => animation.cancel());
   const swap = () => {
-    // Drop any red instantly so the new word flickers in white; sculk eases back to cyan meanwhile.
+    // Reset the old theme before flashing the newly selected mode's colour.
     element.style.transition='none';document.body.classList.remove('infected');element.getBoundingClientRect();element.style.transition='';
     sculk.tint(false);floor.tint(false);
     element.textContent=text;element.classList.toggle('is-long',text.length>12);
     if(reduced.matches) {settleGlow();return;}
-    flicker(element).onfinish = () => {if(token===wordToken)settleGlow();};
+    flicker(element).onfinish = () => {if(token===wordToken)settleGlow(true);};
   };
   if(reduced.matches) {swap();return;}
-  const out = element.animate(FLICKER_OUT,{duration:200,easing:'linear',fill:'forwards'});
+  const out = element.animate(FLICKER_OUT,{duration:modeTiming.fadeOut,easing:'steps(2,end)',fill:'forwards'});
   out.onfinish = () => {if(token!==wordToken)return;swap();out.cancel();};
 }
 // Crop each artwork (object-fit:cover) so its subject lands at the same spot of the media area,
@@ -200,22 +219,24 @@ async function selectMode(index, manual=false) {
   $('#ring-coords').textContent=mode.coords;
   modeOptions.style.setProperty('--index',index);
   showWord(mode.display);
-  const target=placeRing();
-  if(!reduced.matches&&target) {
-    sculk.vibrate(target.x,target.y,900);
-    setTimeout(() => sculk.vibrate(target.x+15,target.y+10,0), 120);
-  }
-  const recordVisual = $('.record-visual');
-  if(recordVisual && !reduced.matches) {
-    recordVisual.classList.add('is-scanning');
-    setTimeout(() => recordVisual.classList.remove('is-scanning'), 1800);
-  }
+  placeRing();
+  pixelPulse($('.record-visual'));
   clearTimeout(recordTimer);
   $('#record-image').style.opacity='.3';
   recordTimer=setTimeout(() => updateRecord(mode),reduced.matches ? 0 : 200);
   if(manual) $('#mode-announcement').textContent='已选择'+mode.title;
   resetClock();
 }
+const pulseTimers = new WeakMap();
+function pixelPulse(element) {
+  if(!element||reduced.matches)return;
+  clearTimeout(pulseTimers.get(element));
+  element.classList.remove('is-pixel-pulse');
+  void element.offsetWidth;
+  element.classList.add('is-pixel-pulse');
+  pulseTimers.set(element,setTimeout(() => {element.classList.remove('is-pixel-pulse');pulseTimers.delete(element);},360));
+}
+$$('.key,.mode-option,.record-open').forEach((button) => button.addEventListener('click',() => pixelPulse(button)));
 selectors.forEach((button) => button.addEventListener('click',() => selectMode(Number(button.dataset.selectMode),true)));
 modeOptions.addEventListener('keydown',(event) => {
   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
@@ -245,7 +266,7 @@ function openVisual() {
   $('#full-visual').src=mode.original;$('#full-visual').alt=mode.title+'完整宣传原画';
   $('#visual-dialog-title').textContent=mode.title+' / 原画';
   dialog.showModal();document.body.classList.add('dialog-open');syncClock();
-  if(!reduced.matches)dialog.animate([{opacity:0,transform:'translateY(30px) scale(.94)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:550,easing:'cubic-bezier(.2,1.25,.35,1)'});
+  if(!reduced.matches)dialog.animate([{opacity:0,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{duration:180,easing:'steps(4,end)'});
 }
 $('.record-open').addEventListener('click',openVisual);
 $('#close-visual').addEventListener('click',() => dialog.close());
@@ -255,7 +276,7 @@ $('#copy-environment').addEventListener('click',async() => {
   const btn = $('#copy-environment');
   btn.classList.add('copied');
   setTimeout(() => btn.classList.remove('copied'), 600);
-  const content='COD Pattern 作战环境\nMinecraft 1.20.1\nJava 17\nForge 47+（项目构建版本 47.4.0）\nTaCZ 1.1.6+\nCOD Pattern 主模组\n可选：COD Pattern Zombies 独立附属\n客户端与服务端保持对应模组一致。';
+  const content='[COD: PATTERN 部署清单]\n运行环境：Minecraft 1.20.1 / Java 17\n模组加载：Forge 47+（构建版本 47.4.0）\n武器核心：TaCZ (Timeless and Classics Zero) 1.1.6+\n玩法核心：COD Pattern 主模组\n可选扩展：COD Pattern Zombies 独立附属\n* 客户端与服务端模组文件须保持一致。';
   const legacyCopy=() => {const input=document.createElement('textarea');input.value=content;input.style.cssText='position:fixed;opacity:0';document.body.append(input);input.select();const success=document.execCommand('copy');input.remove();if(!success)throw new Error('Clipboard unavailable');};
   try {
     if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(content).catch(legacyCopy);
@@ -316,7 +337,7 @@ const sculk = (() => {
   let radarX=0,radarY=0,radarVelocityX=0,radarVelocityY=0,radarTargetX=0,radarTargetY=0;
   let scanAngle=0,scanVelocity=0,scanTarget=0,scanDelay=0;
   function resetScan() {
-    scanAngle=scanVelocity=scanTarget=0;scanDelay=infectedGlow?240:0;
+    scanAngle=scanVelocity=scanTarget=0;scanDelay=infectedGlow?modeTiming.radarWarmup:0;
     ring.style.removeProperty('--radar-scan');
   }
   function scanRadar(elapsed,dt) {
@@ -382,9 +403,8 @@ const sculk = (() => {
   function draw(time,still=false) {
     if(!ctx||!band)return;
     ctx.clearRect(0,0,width,height);
-    // Soul colour moves to its goal over 2s: red accelerates in (ease-in cubic, same as the word in
-    // styles.css), cyan eases back out.
-    const tintProgress=Math.min(1,(time-tintStart)/2000),eased=infectedGlow?tintProgress**3:1-(1-tintProgress)**3;
+    // Souls start with the theme and retain their slower 2s acceleration/deceleration.
+    const tintProgress=Math.min(1,(time-tintStart)/modeTiming.soul),eased=infectedGlow?tintProgress**3:1-(1-tintProgress)**3;
     soul=still?soulGoal.slice():tintFrom.map((value,i) => value+(soulGoal[i]-value)*eased);
     const rgb=soul.map(Math.round).join(',');
     const top=height-band.height,size=band.size,progress=still?1:grown(time);
@@ -471,7 +491,7 @@ const sculk = (() => {
     grow() {growStart=performance.now();},
     vibrate(x,y,delay=0) {if(waves.length<6)waves.push({x,y,t:performance.now()+delay});},
     tint(infected) {
-      if(infectedGlow!==infected) {pulseTempo.set(infected);infectedGlow=infected;scanTarget=0;scanDelay=infected?240:0;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
+      if(infectedGlow!==infected) {pulseTempo.set(infected);infectedGlow=infected;scanTarget=0;scanDelay=infected?modeTiming.radarWarmup:0;soulGoal=infected?RED:CYAN;tintFrom=soul.slice();tintStart=performance.now();}
       if(reduced.matches||!inView)draw(performance.now(),true);
     },
   };
@@ -491,7 +511,7 @@ const floor = (() => {
   }
   function step(time) {
     raf=0;
-    const progress=Math.min(1,Math.max(0,(time-start)/2000)),eased=goal===RED?progress**3:1-(1-progress)**3;
+    const progress=Math.min(1,Math.max(0,(time-start)/modeTiming.soul)),eased=goal===RED?progress**3:1-(1-progress)**3;
     shown=from.map((value,i) => value+(goal[i]-value)*eased);
     paint();
     if(progress<1)raf=requestAnimationFrame(step);
@@ -537,7 +557,15 @@ if('IntersectionObserver' in window) {
   new IntersectionObserver((entries)=>floor.show(entries[0].isIntersecting),{threshold:.25}).observe($('#sculk-floor'));
 }
 document.addEventListener('visibilitychange',()=>{pulseTempo.sync();syncClock();sculk.sync();});
-reduced.addEventListener('change',()=>{pulseTempo.sync();sculk.sync();if(reduced.matches){paused=true;resetClock();document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());}});
+reduced.addEventListener('change',()=>{
+  pulseTempo.sync();sculk.sync();
+  if(!reduced.matches)return;
+  paused=true;resetClock();
+  document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());
+  const word=$('#mode-display'),mode=MODES[current];
+  word.textContent=mode.display;word.classList.toggle('is-long',mode.display.length>12);
+  settleGlow();
+});
 settleRing();sculk.resize();floor.resize();resetClock();sculk.sync();
 
 // Hold the hero copy until the intro runs, so the fallback font never flashes before the flicker.
@@ -547,12 +575,11 @@ function intro() {
   document.documentElement.classList.remove('intro-pending');
   if(reduced.matches)return;
   sculk.grow();
-  const ease='cubic-bezier(.16,1,.3,1)';
-  flicker($('.hero h1'),{delay:120});
-  flicker($('#mode-display'),{delay:520});
-  $$('.hero-kicker,.hero-lede,.hero-actions,.hero-env').forEach((element,i)=>element.animate([{opacity:0},{opacity:1}],{duration:900,delay:i===0?60:520+i*110,easing:'ease-out',fill:'backwards'}));
-  $('.rl-main').animate([{strokeDashoffset:360},{strokeDashoffset:0}],{duration:1800,delay:150,easing:ease,fill:'backwards'});
-  ring.animate([{opacity:0,scale:.86},{opacity:1,scale:1}],{duration:1600,delay:100,easing:ease,fill:'backwards'});
+  $('.hero h1').animate([{opacity:0},{opacity:1}],{duration:240,delay:60,easing:'steps(4,end)',fill:'backwards'});
+  $('#mode-display').animate([{opacity:0},{opacity:1}],{duration:240,delay:180,easing:'steps(4,end)',fill:'backwards'});
+  $$('.hero-kicker,.hero-lede,.hero-actions,.hero-env').forEach((element,i)=>element.animate([{opacity:0},{opacity:1}],{duration:240,delay:i*60,easing:'steps(4,end)',fill:'backwards'}));
+  $('.rl-main').animate([{strokeDashoffset:360},{strokeDashoffset:0}],{duration:600,delay:80,easing:'steps(12,end)',fill:'backwards'});
+  ring.animate([{opacity:0},{opacity:1}],{duration:300,delay:60,easing:'steps(5,end)',fill:'backwards'});
 }
 Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1800))]).then(intro);
 const idle=window.requestIdleCallback||((callback)=>setTimeout(callback,800));
@@ -573,7 +600,7 @@ if('IntersectionObserver' in window && !reduced.matches) {
   $$('.reveal-item').forEach((el) => el.classList.add('is-revealed'));
 }
 
-// Tactical subtle parallax tilt on artwork
+// A restrained image response leaves the pixel frame fixed.
 const visualCard = $('.record-visual');
 if(finePointer.matches && visualCard) {
   visualCard.addEventListener('pointermove', (e) => {
@@ -582,7 +609,7 @@ if(finePointer.matches && visualCard) {
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     const img = visualCard.querySelector('img');
-    if(img) img.style.transform = `scale(1.045) translate3d(${(x * 14).toFixed(1)}px, ${(y * 10).toFixed(1)}px, 0)`;
+    if(img) img.style.transform = `scale(1.02) translate3d(${Math.round(x * 6)}px, ${Math.round(y * 4)}px, 0)`;
   });
   visualCard.addEventListener('pointerleave', () => {
     const img = visualCard.querySelector('img');

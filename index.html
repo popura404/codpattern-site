@@ -6,22 +6,23 @@
   <meta name="theme-color" content="#050a12">
   <meta name="description" content="COD: PATTERN — 回归组织公开行动档案。了解冲锋团队竞技、战术团队竞技与僵尸模式，查阅灾变后的世界记录。">
   <title>COD: PATTERN — 回归 · 行动档案</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23050a12'/%3E%3Ccircle cx='32' cy='32' r='23' fill='none' stroke='%23e4eaee' stroke-width='3'/%3E%3Cpath d='M18 22h9v20h-9zm15 0h13v8H33zm0 14h9v6h-9z' fill='%23e4eaee'/%3E%3Crect x='45' y='11' width='6' height='6' fill='%232ad4c6'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050a12'/%3E%3Cpath d='M16 8h32v8h8v32h-8v8H16v-8H8V16h8z' fill='none' stroke='%23e4eaee' stroke-width='3'/%3E%3Cpath d='M18 22h9v20h-9zm15 0h13v8H33zm0 14h9v6h-9z' fill='%23e4eaee'/%3E%3Crect x='45' y='11' width='6' height='6' fill='%232ad4c6'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/codpattern-display.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" as="image" href="assets/frontline_preview.webp">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
+  <script src="mode-sculk.js" defer></script>
 </head>
 <body data-mode="frontline">
   <a class="skip-link" href="#modes">跳转到模式选择</a>
   <header class="site-header">
     <a href="#top" class="brand" aria-label="COD Pattern 首页">
-      <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M18 20h9v24h-9zm16 0h13v9H34zm0 16h9v8h-9z"/><rect class="brand-node" x="47" y="8" width="6" height="6"/></svg>
+      <svg class="brand-mark" aria-hidden="true" viewBox="0 0 64 64"><path class="brand-frame" d="M16 4h32v8h8v8h4v24h-4v8h-8v8H16v-8H8v-8H4V20h4v-8h8z"/><path d="M18 20h9v24h-9zm16 0h13v9H34zm0 16h9v8h-9z"/><rect class="brand-node" x="47" y="8" width="6" height="6"/></svg>
       <span class="brand-word">COD<span class="brand-colon">:</span>PATTERN<small>Regression · 回归</small></span>
     </a>
     <nav aria-label="主导航"><a href="#modes">选择战场</a><a href="#field">作战档案</a><a href="#world">世界记录</a><a href="#deployment">部署须知</a></nav>
     <span class="header-status"><span class="signal-meter" aria-hidden="true"><span></span><span></span><span></span><span></span></span><i class="led" aria-hidden="true"></i>MC 1.20.1</span>
-    <a class="header-action key key-light" href="#modes">选择战场<span aria-hidden="true">＋</span></a>
+    <a class="header-action key key-light" href="#modes">切入战线<span aria-hidden="true">＋</span></a>
   </header>
   <main>
     <section class="hero" id="top" aria-label="三种作战模式" aria-roledescription="轮播">
@@ -33,22 +34,26 @@
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="lab-grid" aria-hidden="true"></div>
       <div class="lab-ring" aria-hidden="true">
-        <svg viewBox="0 0 400 400">
+        <svg viewBox="0 0 400 400" shape-rendering="geometricPrecision">
+          <circle class="rl rl-main" cx="200" cy="200" r="196" pathLength="360"/>
+          <circle class="rl-ticks" cx="200" cy="200" r="187" pathLength="360" stroke-dasharray=".3 2.7"/>
+          <circle class="rl-ticks rl-major" cx="200" cy="200" r="185" pathLength="360" stroke-dasharray=".5 29.5"/>
+          <circle class="rl rl-dash" cx="200" cy="200" r="164"/>
+          <circle class="rl rl-faint" cx="200" cy="200" r="116"/>
           <g class="ring-outer">
-            <circle class="rl rl-main" cx="200" cy="200" r="196" pathLength="360"/>
-            <circle class="rl-arc" cx="200" cy="200" r="196" pathLength="360" stroke-dasharray="34 326"/>
-            <circle class="rl-ticks" cx="200" cy="200" r="187" pathLength="360" stroke-dasharray=".3 2.7"/>
-            <circle class="rl-ticks rl-major" cx="200" cy="200" r="185" pathLength="360" stroke-dasharray=".5 29.5"/>
-            <rect class="rl-node" x="392" y="196" width="8" height="8"/>
-            <rect class="rl-node" x="196" y="392" width="8" height="8"/>
+            <rect class="rl-arc" x="196" y="0" width="8" height="8"/>
+            <rect class="rl-arc" x="392" y="196" width="8" height="8"/>
+            <rect class="rl-node" x="0" y="194" width="12" height="12"/>
+            <rect class="rl-node" x="194" y="388" width="12" height="12"/>
           </g>
           <g class="ring-inner">
-            <circle class="rl rl-dash" cx="200" cy="200" r="164"/>
-            <circle class="rl-accent" cx="200" cy="200" r="164" pathLength="360" stroke-dasharray="24 336" transform="rotate(-120 200 200)"/>
-            <circle class="rl rl-faint" cx="200" cy="200" r="116"/>
+            <rect class="rl-accent" x="196" y="32" width="8" height="8"/>
+            <rect class="rl-accent" x="360" y="196" width="8" height="8"/>
+            <rect class="rl-accent" x="196" y="360" width="8" height="8"/>
+            <rect class="rl-accent" x="32" y="196" width="8" height="8"/>
           </g>
-          <path class="rl-cross" d="M200-18v44M200 374v44M-18 200h44M374 200h44"/>
-          <path class="rl-reticle" d="M200 189l11 11-11 11-11-11z"/>
+          <path class="rl-cross" d="M200 0v32M200 368v32M0 200h32M368 200h32"/>
+          <path class="rl-reticle" d="M188 188h24v24h-24zM200 176v12M200 212v12M176 200h12M212 200h12"/>
         </svg>
         <div class="ring-label"><span>FIELD / <b id="visual-id">FTL</b></span><span class="ring-coords" id="ring-coords">X 064 / Y -052 / Z 128</span></div>
       </div>
@@ -66,7 +71,7 @@
       <div class="mode-options">
         <span class="mode-lens" aria-hidden="true"></span>
         <button class="mode-option is-active" data-select-mode="0" aria-pressed="true" style="--mode-color:#62f08a"><span class="option-no">01</span><span class="option-copy"><span class="option-en">FRONTLINE</span><strong>冲锋团队竞技</strong><span class="option-tags">基地复活<i></i>击杀得分</span></span><span class="mode-progress" aria-hidden="true"><i></i></span></button>
-        <button class="mode-option" data-select-mode="1" aria-pressed="false" style="--mode-color:#5fc7c3"><span class="option-no">02</span><span class="option-copy"><span class="option-en">TEAM DEATHMATCH</span><strong>战术团队竞技</strong><span class="option-tags">动态复活<i></i>灵活交锋</span></span><span class="mode-progress" aria-hidden="true"><i></i></span></button>
+        <button class="mode-option" data-select-mode="1" aria-pressed="false" style="--mode-color:#5fc7c3"><span class="option-no">02</span><span class="option-copy"><span class="option-en">TEAM DEATHMATCH</span><strong>战术团队竞技</strong><span class="option-tags">动态选点<i></i>战术穿插</span></span><span class="mode-progress" aria-hidden="true"><i></i></span></button>
         <button class="mode-option" data-select-mode="2" aria-pressed="false" style="--mode-color:#e0675f"><span class="option-no">03</span><span class="option-copy"><span class="option-en">ZOMBIES</span><strong>僵尸模式</strong><span class="option-tags">波次生存<i></i>并肩抵抗</span></span><span class="mode-progress" aria-hidden="true"><i></i></span></button>
       </div>
     </section>
@@ -80,7 +85,6 @@
           <button type="button" class="record-visual record-open" aria-label="查看作战档案完整原画" aria-haspopup="dialog">
             <img id="record-image" src="assets/frontline_preview.webp" width="2560" height="1440" alt="冲锋团队竞技原画" loading="lazy" decoding="async">
             <span class="corner-marks" aria-hidden="true"></span>
-            <span class="laser-scanner" aria-hidden="true"></span>
             <span class="original-button" aria-hidden="true"><span class="expand-icon"></span></span>
           </button>
           <div class="record-body">
@@ -88,35 +92,36 @@
             <h3 id="record-title">冲锋团队竞技</h3>
             <p id="record-tagline">守住阵线。向前推进。</p>
             <dl class="record-specs"><div><dt>交战</dt><dd id="record-combat">团队对抗</dd></div><div><dt id="mechanic-label">复活</dt><dd id="record-mechanic">固定基地</dd></div><div><dt>目标</dt><dd id="record-goal">击杀得分</dd></div></dl>
-            <div class="record-brief"><span class="brief-label">行动要点</span><p id="record-brief">从各自基地重返战场，与队友协同推进。击杀对手积累团队分数；阵亡后在己方基地复活，再次投入交锋。</p></div>
-            <div class="record-switch" role="group" aria-label="切换玩法档案"><button data-select-mode="0" class="key key-dark is-active" aria-pressed="true">01</button><button data-select-mode="1" class="key key-dark" aria-pressed="false">02</button><button data-select-mode="2" class="key key-dark" aria-pressed="false">03</button><span class="barcode" aria-hidden="true"></span></div>
+            <div class="record-brief"><span class="brief-label">行动要点</span><p id="record-brief">以己方基地为稳固依托，与队友协同向前推进。消灭敌对目标积累团队积分；阵亡后重整防线快速返场，以密集攻势撕开对手战线。</p></div>
+            <div class="record-switch" role="group" aria-label="切换玩法档案"><button data-select-mode="0" class="key key-dark is-active" aria-pressed="true"><span class="switch-label">01</span></button><button data-select-mode="1" class="key key-dark" aria-pressed="false"><span class="switch-label">02</span></button><button data-select-mode="2" class="key key-dark" aria-pressed="false"><span class="switch-label">03</span></button><span class="barcode" aria-hidden="true"></span></div>
           </div>
         </div>
       </article>
       <ul class="feature-strip reveal-item">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>装备预设</li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h6v6H3zM9 4h6v6H9zM15 10h6v6h-6zM6 20h12"/></svg>小队协作</li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>自定义战场</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v2h2v2h2v8h-2v2h-2v2H8v-2H6v-2H4V8h2V6h2zM12 0v8M12 16v8M0 12h8M16 12h8"/></svg>TaCZ战术配装</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2h8v6H8zM0 12h8v6H0zM16 12h8v6h-8zM12 8v4M4 12v-2h16v2M4 18v4h16v-4"/></svg>小队动态协同</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h6V4h8v2h6v14h-6v-2H8v2H2zM8 6v12M16 6v12M10 10h4v4h-4z"/></svg>模块化战场编排</li>
       </ul>
     </section>
     <section class="world-section section" id="world" aria-labelledby="world-title">
       <div class="world-heading reveal-item">
         <p class="section-index"><b>03</b>世界记录</p>
         <h2 id="world-title">记录仍在<br>归途未明</h2>
-        <p class="world-intro">我们是回归，追索古老传说与异常规律的研究者。有人希望突破文明的边界，有人只想理解未知；共同的研究，曾让我们走到一起。</p>
-        <p class="world-intro">灾变之后，联系与资源体系受损。有人封存资料，有人继续实验，也有人留在幸存者身边。本节点仍在整理记录，试着接续那些中断的消息。</p>
+        <p class="world-intro">在联合历的世界里，人类曾成功将古老的空间传说转化为现代工业。红石能源驱动着电工与重型机械，下界交通将千里之遥缩减至八分之一，成体系的公共行政与科学探索让人类误以为已经完全掌握了世界的规则。</p>
+        <p class="world-intro">联合历 102 年秋，归航实验引发的规则级量子潮汐顺着空间拓扑席卷全球。各大工业下界门稳定芯片瞬间烧毁，空间折叠优势沦为毁灭性的毒气倒灌；而真正摧毁文明的，是随之而来的凶猛尸潮——通过撕咬与体液传播的狂暴感染，以数百倍于毒雾蔓延的速度，在数周内彻底击穿了全大陆的防御体系。</p>
+        <p class="world-intro">灾变之后，通信阻断，大陆陷入长达十数年的漫长末世。联合政府残部各自为政，屏障科技集团分裂割据。我们作为回归组织分散各地的留存节点，仍在废墟短波电波中整理记录，试着为仍在废墟中扣动扳机的幸存者接续真相与战术指引。</p>
         <span class="world-signature"><i class="led" aria-hidden="true"></i>REGRESSION / 留存节点</span>
       </div>
       <article class="dispatch reveal-item" aria-label="僵尸模式世界观简报">
-        <div class="dispatch-top"><span>PUBLIC RECORD / 001</span><span>僵尸模式</span></div>
+        <div class="dispatch-top"><span>PUBLIC RECORD / 001</span><span>僵尸模式 · 联合历 102-103 档案</span></div>
         <dl class="dispatch-records">
-          <div><dt><span>01</span>灾变</dt><dd>多地工业下界门相继故障，污染从设施中外泄。尸化与幽匿活动的报告接连传来，危机在不同地区同时扩大。门体为何失效、异常从何而来，我们仍缺少完整答案。</dd></div>
-          <div><dt><span>02</span>幽匿</dt><dd>感测体捕捉震动，地下节点交换信息。部分被接管的躯体仍保留旧日的动作与路线，可能推开熟悉的门，也可能反复走过同一条街。熟悉的举动，不代表熟悉的人还在那里。</dd></div>
-          <div><dt><span>03</span>测试镇</dt><dd>这座位于板岩城边陲的小镇已遭重创，地下遗迹与受损设施仍留下许多未解记录。离开废墟，不意味着重新进入正常世界；道路尽头的灯光，也需要重新确认。</dd></div>
-          <div><dt><span>04</span>红科</dt><dd>板岩城以东的红石科技大学曾有图书馆、食堂与宿舍，白砖楼群和钟楼见证过平常的校园生活。如今，医疗资源与通信设施成为幸存者寻找帮助的理由；校园是否安全、设备能否使用，仍待现场确认。</dd></div>
-          <div><dt><span>05</span>秩序</dt><dd>联合政府仍有部门运作，屏障科技集团仍有人员维持防线。有人救援，有人执行旧日的封锁，也有人争夺资源。旧标识和旧命令仍在，但发出它们的人，未必还握有完整消息。</dd></div>
+          <div><dt><span>01</span>灾变</dt><dd>归航实验释放的规则级潮汐瞬间击溃了微米级的空间坐标运算，全球工业下界门的防爆协调芯片发生联锁爆损。原本作为八倍速物流枢纽的下界门，沦为喷涌高温剧毒气体的不可控破口，导致第一批暴露者机能停摆并迅速尸化。但真正的主体浩劫在于失控的尸潮：携带幽匿种子的死者被重新驱动，通过伤口抓咬与体液传染以几何级数暴发蔓延，其扩散速度远超下界毒气的物理弥漫，在数十日内便让所有现代都市据点相继沦陷为孤岛。</dd></div>
+          <div><dt><span>02</span>幽匿</dt><dd>幽匿并非普通的寄生生物，而是方块世界底层的“记忆黑匣子与循环沉淀池”，原本负责吸收消逝者的生命信息并重组创生。然而在远古覆灭的灾难中，亿万死者的极端怨恨彻底冲垮了重组程序，使其恶性过载为只认杀戮的“恶意序列”。丧尸疯狂扑咬活人，根本不是为了进食，而是体内坏死的幽匿核心对活人体内高度活跃的“高阶经验流”有着永无止境的原始饥渴。丧尸在废墟中反复推门、走过旧工位的残留行为，仅仅是幽匿在低速燃烧其未散尽的残余记忆片段。</dd></div>
+          <div><dt><span>03</span>法则</dt><dd>量子潮汐抹除了高维空间技术，但宏观牛顿力学、机械撞针、枪机火药与内燃机 100% 绝对免疫。这正是高维文明瞬间解体后，战士手中冰冷的 TaCZ 战术枪械与常规弹药成为末日生存唯一可靠基石的物理铁律。但常规交火伴随着致命悖论：枪弹能击碎腐肉，却杀不死寄生的幽匿组织。死者碎肉与残存经验渗入地下，反而会就地“施肥”，加速地底幽匿网络的滋生与扩张。若在同一防线大量杀戮而不转移，极度聚集的恶意序列将破土重组成足以碾碎装甲车辆的恐怖巨怪——坚守者（Warden）。</dd></div>
+          <div><dt><span>04</span>战区</dt><dd>边陲测试镇作为破口核心区，承受了潮汐爆发与联合政府初期误判所实施的饱和轰炸，干线桥梁全断，唯有地下货运仓库的防爆铁门与火车涵洞勉强通向外界；位于板岩城以东的百年名校红石科技大学（红科），白砖楼群与银杏大道已被尸潮合围，但品学楼的高功率电台、完好的医疗器械与红石科学工程学院楼地下的微波屏蔽战备密道，使其成为逃生学生与残存车队拼死争夺的战略中继枢纽。</dd></div>
+          <div><dt><span>05</span>秩序</dt><dd>现代秩序荡然无存。联合政府残部因弹药告罄彻底滑向冰冷的“功利主义利维坦”，在防空聚落推行极端残酷的资源配给；屏障科技集团高层失联后内部分裂，掌控重兵的“极端派”将测试镇工业区布雷要塞化并武力拒止外界，“和平派”工程师则暗中维持人造屏障防线、救援难民；废土游商与流民在缝隙中建立黑市，流通着防爆电池、自制弹药、人造回响碎片以及战前遗留的昂贵硬通货——“经验安神原液”。</dd></div>
         </dl>
-        <div class="dispatch-bottom"><span>寻找补给，保持通信。照应与你同行的人。</span><span class="barcode" aria-hidden="true"></span></div>
+        <div class="dispatch-bottom"><span>高维坐标已死，但枪机与火药仍在。保持短波监听，照应与你并肩的人。</span><span class="barcode" aria-hidden="true"></span></div>
       </article>
     </section>
     <section class="deployment-section section" id="deployment" aria-labelledby="deploy-title">
@@ -128,9 +133,9 @@
         <div class="device-top"><span>ENVIRONMENT</span><span class="device-ready"><i class="led" aria-hidden="true"></i>MC / FORGE</span></div>
         <div class="lcd"><span class="lcd-label">MINECRAFT</span><strong>1.20.1</strong></div>
         <ul class="environment-specs"><li>Java 17</li><li>Forge 47+</li><li>TaCZ 1.1.6+</li></ul>
-        <button id="copy-environment" class="key key-light copy-button">复制环境清单<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3h10v10H7z"/><path d="M13 13v4H3V7h4"/></svg></button>
+        <button id="copy-environment" class="key key-light copy-button">复制环境清单<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 2h10v12H8zM12 14v4H2V6h6M12 6h4M12 10h4"/></svg></button>
         <span class="copy-status" id="copy-status" role="status"></span>
-        <details><summary>安装与开局<span class="details-indicator" aria-hidden="true"></span></summary><div class="deployment-notes"><p>客户端、服务端安装相同模组。僵尸玩法另装 Zombies 附属。</p><p>由服主配置地图、出生点与模式设施；入房准备，投票开局。入场前存放随身物品。</p></div></details>
+        <details><summary>安装与开局<span class="details-indicator" aria-hidden="true"></span></summary><div class="deployment-notes"><p><strong>模组部署：</strong>客户端与服务端需保持模组与版本一致；体验僵尸玩法需额外装载 Zombies 独立附属。</p><p><strong>战局筹备：</strong>服主配置地图、出生点与模式设施；玩家入房准备并投票开局。进入交火区域前请妥善存放随身物资。</p></div></details>
       </div>
       <canvas id="sculk-floor" aria-hidden="true"></canvas>
     </section>
