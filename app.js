@@ -14,7 +14,6 @@ const ring = $('.lab-ring');
 const dialog = $('#visual-dialog');
 const frames = $$('.hero-frame');
 const selectors = $$('[data-select-mode]');
-const bars = $$('.mode-progress i');
 const modeOptions = $('.mode-options');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = matchMedia('(pointer:fine)');
@@ -60,7 +59,10 @@ let inView = true;
 let focused = false;
 let changing = false;
 let requestId = 0;
-let clockAnimation = null;
+let cycleRemaining = cycleDuration;
+let cycleStartedAt = 0;
+let clockRunning = false;
+let cycleTimer;
 let wordToken = 0;
 let themeEchoTimer;
 let recordTimer;
@@ -79,20 +81,40 @@ function loadFrame(index) {
   return result;
 }
 function playAllowed() { return !paused && inView && !document.hidden && !focused && !dialog.open && !changing; }
+function remainingCycleTime(time=performance.now()) {
+  return Math.max(0,cycleRemaining-(clockRunning?time-cycleStartedAt:0));
+}
+function emitCycle() {
+  const at=performance.now();
+  document.dispatchEvent(new CustomEvent('codpattern:cycle',{detail:{
+    index:current,candidateIndex:(current+1)%MODES.length,
+    remaining:remainingCycleTime(at),duration:cycleDuration,
+    running:clockRunning,enabled:!paused,at,
+  }}));
+}
+function scheduleCycle() {
+  clearTimeout(cycleTimer);
+  if(!clockRunning)return;
+  const wait=remainingCycleTime();
+  cycleTimer=setTimeout(()=>{
+    if(!playAllowed()){syncClock();return;}
+    if(remainingCycleTime()>0){emitCycle();scheduleCycle();return;}
+    cycleRemaining=0;clockRunning=false;
+    emitCycle();
+    selectMode((current+1)%MODES.length);
+  },Math.max(1,wait));
+}
 function syncClock() {
-  if(!clockAnimation) return;
-  if(playAllowed()) clockAnimation.play();
-  else clockAnimation.pause();
+  const allowed=playAllowed();
+  if(allowed && !clockRunning){cycleStartedAt=performance.now();clockRunning=true;}
+  else if(!allowed && clockRunning){cycleRemaining=remainingCycleTime();clockRunning=false;}
+  emitCycle();scheduleCycle();
 }
 function resetClock() {
-  clockAnimation?.cancel();clockAnimation=null;
-  bars.forEach((bar,i) => {bar.style.clipPath = i === current && paused ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)';});
-  if(paused) return;
-  const animation = bars[current].animate([{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0% 0 0)'}],{duration:cycleDuration,fill:'forwards',easing:'linear'});
-  clockAnimation=animation;
-  animation.onfinish = () => {if(clockAnimation === animation && !paused) selectMode((current+1)%MODES.length);};
+  clearTimeout(cycleTimer);clockRunning=false;cycleRemaining=cycleDuration;
   syncClock();
 }
+document.addEventListener('codpattern:cycle-request',emitCycle);
 // Only changing mode words flash, using the newly selected mode's signal colour.
 const FLICKER_OUT = [{opacity:1},{opacity:0}];
 function flicker(element) {
@@ -561,7 +583,7 @@ reduced.addEventListener('change',()=>{
   pulseTempo.sync();sculk.sync();
   if(!reduced.matches)return;
   paused=true;resetClock();
-  document.getAnimations().filter(a=>a!==clockAnimation&&a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());
+  document.getAnimations().filter(a=>a.effect?.getComputedTiming().endTime!==Infinity).forEach(a=>a.cancel());
   const word=$('#mode-display'),mode=MODES[current];
   word.textContent=mode.display;word.classList.toggle('is-long',mode.display.length>12);
   settleGlow();

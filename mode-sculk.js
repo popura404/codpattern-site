@@ -6,7 +6,28 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const shades = ['#04191e','#062329','#082d32','#0b383b','#104449'];
   const states = [];
+  const idleLevel=.065,hoverLevel=.42,confirmDuration=620,retreatDuration=340;
   let frameId = 0;
+  let cycle = {index:-1,candidateIndex:-1,remaining:0,duration:8000,running:false,enabled:false,at:0};
+
+  function remainingAt(time) {
+    return Math.max(0,cycle.remaining-(cycle.running?Math.max(0,time-cycle.at):0));
+  }
+
+  function isCandidate(state) {
+    return !reduced.matches && cycle.enabled && !state.active && state.index===cycle.candidateIndex;
+  }
+
+  function targetAt(state,time) {
+    if(state.active) return 1;
+    if(reduced.matches) return idleLevel;
+    if(isCandidate(state)) {
+      const progress=Math.max(0,Math.min(1,1-remainingAt(time)/cycle.duration));
+      const checkpoint=state.growth?.checkpoint?.birth ?? hoverLevel;
+      return idleLevel+(checkpoint-idleLevel)*progress;
+    }
+    return state.hovered || state.focused ? hoverLevel : idleLevel;
+  }
 
   function random(seed) {
     return () => {
@@ -61,25 +82,42 @@
       while(id>=0 && !vein[id]) {vein[id]=1;id=parent[id];}
     }
     const nodes = new Set(tips);
-    return {cols,rows,farthest,cells:queue.map(id => ({
+    const cells=queue.map(id => ({
       x:(id%cols)*size,y:Math.floor(id/cols)*size,
       birth:distance[id]/farthest,shade:Math.floor(rand()*shades.length),
       vein:vein[id],node:nodes.has(id),seed:rand(),
-    }))};
+    }));
+    let edgeNodes=cells.filter(cell=>cell.node &&
+      (Math.min(cell.x,width-cell.x-size)<size*2 || cell.y>=height-size*2));
+    if(!edgeNodes.length) edgeNodes=cells.filter(cell=>cell.node);
+    // The candidate reaches one existing edge tip exactly when its real clock expires.
+    const checkpoint=edgeNodes.reduce((best,cell)=>!best ||
+      Math.abs(cell.birth-hoverLevel)<Math.abs(best.birth-hoverLevel)?cell:best,null);
+    return {cols,rows,farthest,cells,checkpoint};
   }
 
   function levelAt(state,time) {
+    const target=targetAt(state,time);
+    if(reduced.matches || !state.duration) return target;
     const t = Math.max(0,Math.min(1,(time-state.started)/state.duration));
-    return state.from+(state.target-state.from)*(1-Math.pow(1-t,2));
+    return state.from+(target-state.from)*(1-Math.pow(1-t,2));
   }
 
-  function paint(state,time,still=false) {
+  function movingAt(state,time) {
+    if(reduced.matches) return false;
+    return (state.duration>0 && time<state.started+state.duration+850) ||
+      (isCandidate(state) && cycle.running && remainingAt(time)>0);
+  }
+
+  function paint(state,time) {
     const {ctx,width,height,size,growth} = state;
     if(!ctx || !growth) return;
     ctx.clearRect(0,0,width,height);
-    const level = still ? state.target : levelAt(state,time);
-    const advancing = !still && state.target>state.from && time<state.started+state.duration;
-    const wave = still ? 2 : (time-state.started)/850;
+    const level=levelAt(state,time),candidate=isCandidate(state);
+    const advancing=!reduced.matches && time<state.started+state.duration && targetAt(state,time)>state.from;
+    const wave=reduced.matches || !state.duration ? 2 : (time-state.started)/850;
+    const interaction=state.hovered || state.focused ? .08 : 0;
+    const confirming=state.active && time<state.confirmUntil;
     for(const cell of growth.cells) {
       if(cell.birth>level) continue;
       const edge = Math.min(cell.x,width-cell.x-size);
@@ -87,18 +125,18 @@
       ctx.fillStyle=shades[cell.shade];
       ctx.fillRect(cell.x,cell.y,size,size);
       if(cell.vein) {
-        ctx.globalAlpha=state.active ? .24 : .14;
+        ctx.globalAlpha=(state.active ? .36 : candidate ? .2 : .14)+interaction;
         ctx.fillStyle='rgb('+state.rgb+')';
         ctx.fillRect(cell.x,cell.y,size,size);
       }
-      // Bright tips stay at the outer seam; text and the timer have their own upper layer.
+      // Bright tips stay at the outer seam, below the labels.
       if(cell.node && (edge<size*2 || cell.y>height-size*2)) {
         const echo = Math.max(0,1-Math.abs(wave-cell.birth)*4);
-        ctx.globalAlpha=(state.active ? .42 : .2)+(still ? 0 : echo*.4);
+        ctx.globalAlpha=Math.min(1,(state.active ? .58 : .2)+echo*.28+interaction+(confirming ? .1 : 0));
         ctx.fillStyle='rgb('+state.rgb+')';
         ctx.fillRect(cell.x,cell.y,size,size);
-      } else if(advancing && level-cell.birth<.045 && cell.vein) {
-        ctx.globalAlpha=.55;
+      } else if((candidate || advancing) && level-cell.birth<(candidate ? .025 : .045) && cell.vein) {
+        ctx.globalAlpha=(state.active ? .62 : .34)+interaction;
         ctx.fillStyle='rgb('+state.rgb+')';
         ctx.fillRect(cell.x,cell.y,size,size);
       }
@@ -112,11 +150,14 @@
     let moving=false;
     for(const state of states) {
       if(!state.visible) continue;
-      if(time-state.lastPaint>=32 || time>=state.started+state.duration) {
-        paint(state,time,time>=state.started+state.duration+850);
+      const animating=movingAt(state,time);
+      const growing=state.duration>0 && time<state.started+state.duration;
+      if(time-state.lastPaint>=32 || state.wasMoving && !animating || state.wasGrowing && !growing) {
+        paint(state,time);
         state.lastPaint=time;
       }
-      if(time<state.started+state.duration+850) moving=true;
+      state.wasMoving=animating;state.wasGrowing=growing;
+      if(animating) moving=true;
     }
     if(moving) frameId=requestAnimationFrame(frame);
   }
@@ -125,16 +166,66 @@
     if(!frameId && !document.hidden && !reduced.matches) frameId=requestAnimationFrame(frame);
   }
 
-  function update(state) {
-    state.active=state.button.getAttribute('aria-pressed')==='true';
-    const target=state.active ? 1 : (state.hovered || state.focused ? .42 : .065);
-    if(target===state.target) return;
+  function refresh() {
     const time=performance.now();
-    state.from=levelAt(state,time);state.target=target;state.started=time;
-    state.duration=target>state.from?620:340;
-    if(reduced.matches || !state.visible || document.hidden) {
-      state.from=target;paint(state,time,true);
-    } else requestFrame();
+    let moving=false;
+    for(const state of states) {
+      if(!state.visible || document.hidden) continue;
+      paint(state,time);state.lastPaint=time;state.wasMoving=movingAt(state,time);
+      state.wasGrowing=state.duration>0 && time<state.started+state.duration;
+      if(state.wasMoving) moving=true;
+    }
+    if(moving) requestFrame();
+    else if(frameId) {cancelAnimationFrame(frameId);frameId=0;}
+  }
+
+  function clearConfirmation(state) {
+    clearTimeout(state.confirmTimer);state.confirmUntil=0;
+    state.button.classList.remove('is-sculk-confirming');
+  }
+
+  function beginTransition(state,from,time,duration,confirm=false) {
+    state.from=from;state.started=time;state.duration=reduced.matches?0:duration;
+    if(confirm && !reduced.matches) {
+      clearConfirmation(state);
+      state.confirmUntil=time+confirmDuration;
+      state.button.classList.add('is-sculk-confirming');
+      state.confirmTimer=setTimeout(()=>{
+        state.confirmUntil=0;state.button.classList.remove('is-sculk-confirming');
+      },confirmDuration);
+    }
+  }
+
+  function capture(time) {
+    return states.map(state=>({level:levelAt(state,time),active:state.active,candidate:isCandidate(state)}));
+  }
+
+  function reconcile(time,before,firstCycle=false) {
+    states.forEach((state,index)=>{
+      const previous=before[index];
+      state.active=state.button.getAttribute('aria-pressed')==='true';
+      if(!state.active) clearConfirmation(state);
+      if(state.active!==previous.active) {
+        beginTransition(state,previous.level,time,state.active?confirmDuration:retreatDuration,state.active);
+      } else if(previous.candidate!==isCandidate(state)) {
+        const target=targetAt(state,time);
+        if(firstCycle || Math.abs(previous.level-target)<.0001) {
+          state.from=target;state.started=time;state.duration=0;
+        } else beginTransition(state,previous.level,time,target>previous.level?confirmDuration:retreatDuration);
+      }
+    });
+    refresh();
+  }
+
+  function interact(state,key,value) {
+    const time=performance.now(),from=levelAt(state,time),previous=targetAt(state,time);
+    state[key]=value;
+    const target=targetAt(state,time);
+    // Hover on the real candidate only brightens its current frontier.
+    if(Math.abs(target-previous)>.0001) {
+      beginTransition(state,from,time,target>from?confirmDuration:retreatDuration);
+    }
+    refresh();
   }
 
   function resize(state) {
@@ -145,8 +236,7 @@
     state.canvas.width=Math.round(width*dpr);state.canvas.height=Math.round(height*dpr);
     state.ctx.setTransform(dpr,0,0,dpr,0,0);
     state.growth=makeGrowth(width,height,state.size,1937+state.index*911,state.compact);
-    paint(state,performance.now(),reduced.matches || !state.visible || document.hidden);
-    requestFrame();
+    refresh();
   }
 
   for(const button of buttons) {
@@ -161,16 +251,19 @@
     const active=button.getAttribute('aria-pressed')==='true';
     const state={button,canvas,ctx:canvas.getContext('2d'),compact,index,rgb,
       size:compact?2:4,width:0,height:0,visible:false,active,hovered:false,focused:false,
-      from:active?1:.065,target:active?1:.065,started:performance.now(),duration:620,lastPaint:0};
+      from:active?1:idleLevel,started:0,duration:0,lastPaint:0,wasMoving:false,wasGrowing:false,
+      confirmUntil:0,confirmTimer:null};
     states.push(state);resize(state);
-    button.addEventListener('pointerenter',event=>{if(event.pointerType!=='mouse')return;state.hovered=true;update(state);});
-    button.addEventListener('pointerleave',()=>{state.hovered=false;update(state);});
-    button.addEventListener('pointercancel',()=>{state.hovered=false;update(state);});
-    button.addEventListener('focus',()=>{state.focused=true;update(state);});
-    button.addEventListener('blur',()=>{state.focused=false;update(state);});
+    button.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')interact(state,'hovered',true);});
+    button.addEventListener('pointerleave',()=>interact(state,'hovered',false));
+    button.addEventListener('pointercancel',()=>interact(state,'hovered',false));
+    button.addEventListener('focus',()=>interact(state,'focused',true));
+    button.addEventListener('blur',()=>interact(state,'focused',false));
   }
 
-  const selectionObserver=new MutationObserver(()=>states.forEach(update));
+  const selectionObserver=new MutationObserver(()=>{
+    const time=performance.now();reconcile(time,capture(time));
+  });
   states.forEach(state=>selectionObserver.observe(state.button,{attributes:true,attributeFilter:['aria-pressed']}));
   if('ResizeObserver' in window) {
     const resizer=new ResizeObserver(entries=>entries.forEach(entry=>resize(states.find(state=>state.button===entry.target))));
@@ -180,22 +273,42 @@
     const visibility=new IntersectionObserver(entries=>{
       for(const entry of entries) {
         const state=states.find(item=>item.button===entry.target);
-        state.visible=entry.isIntersecting;state.from=state.target;
-        state.started=performance.now()-state.duration-850;
-        if(state.visible) paint(state,performance.now(),true);
+        state.visible=entry.isIntersecting;
       }
+      document.dispatchEvent(new Event('codpattern:cycle-request'));
+      refresh();
     });
     states.forEach(state=>visibility.observe(state.button));
   } else states.forEach(state=>{state.visible=true;});
 
-  function settle() {
+  function visibilityChanged() {
     if(frameId) cancelAnimationFrame(frameId);
     frameId=0;
-    for(const state of states) {
-      state.from=state.target;state.started=performance.now()-state.duration-850;
-      if(state.visible && !document.hidden) paint(state,performance.now(),true);
-    }
+    if(!document.hidden) document.dispatchEvent(new Event('codpattern:cycle-request'));
+    refresh();
   }
-  reduced.addEventListener('change',settle);
-  document.addEventListener('visibilitychange',settle);
+  document.addEventListener('codpattern:cycle',event=>{
+    const detail=event.detail;
+    if(!detail) return;
+    const time=performance.now(),before=capture(time),firstCycle=cycle.index<0;
+    // Capture before replacing the old clock: its candidate may now be the active button.
+    const index=Number(detail.index);
+    cycle={
+      index,candidateIndex:Number.isFinite(detail.candidateIndex)?detail.candidateIndex:(index+1)%3,
+      remaining:Math.max(0,Number(detail.remaining)||0),
+      duration:Math.max(1,Number(detail.duration)||8000),running:Boolean(detail.running),enabled:Boolean(detail.enabled),
+      at:Number.isFinite(detail.at)?detail.at:performance.now(),
+    };
+    reconcile(time,before,firstCycle);
+  });
+  reduced.addEventListener('change',()=>{
+    const time=performance.now();
+    if(reduced.matches) states.forEach(state=>{
+      clearConfirmation(state);state.from=targetAt(state,time);state.started=time;state.duration=0;
+    });
+    visibilityChanged();
+  });
+  document.addEventListener('visibilitychange',visibilityChanged);
+  document.dispatchEvent(new Event('codpattern:cycle-request'));
+  refresh();
 })();

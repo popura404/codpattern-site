@@ -203,7 +203,7 @@ body[data-mode=zombies] .hero-word>span{color:color-mix(in srgb,#e4eaee,#892b2c 
 .mode-console{position:relative;z-index:6;min-height:var(--console-h);padding:12px var(--pad);background:var(--abyss);border-top:1px solid color-mix(in srgb,var(--sculk) 24%,transparent);border-bottom:1px solid var(--line);box-shadow:inset 0 4px 0 #030a10}
 .mode-options{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;--index:0}
 .mode-lens{display:none}
-.mode-option{position:relative;z-index:1;display:flex;align-items:center;gap:clamp(12px,1.6vw,22px);min-height:calc(var(--console-h) - 24px);padding:22px clamp(20px,2.2vw,34px);text-align:left;border:1px solid var(--line);background:var(--void);box-shadow:inset 0 -4px 0 #02070b;transition:background-color .16s,border-color .16s}
+.mode-option{position:relative;z-index:1;display:flex;align-items:center;gap:clamp(12px,1.6vw,22px);min-height:calc(var(--console-h) - 24px);padding:20px clamp(20px,2.2vw,34px);text-align:left;border:1px solid var(--line);background:var(--void);box-shadow:inset 0 -4px 0 #02070b;transition:background-color .16s,border-color .16s,box-shadow .24s}
 .mode-option+.mode-option::after{content:none}
 .mode-option::before{content:"";position:absolute;inset:-1px;z-index:-1;pointer-events:none;opacity:0;--corner:linear-gradient(var(--mode-color),var(--mode-color));background:var(--corner) 0 0/20px 2px,var(--corner) 0 0/2px 20px,var(--corner) 100% 0/20px 2px,var(--corner) 100% 0/2px 20px,var(--corner) 0 100%/20px 2px,var(--corner) 0 100%/2px 20px,var(--corner) 100% 100%/20px 2px,var(--corner) 100% 100%/2px 20px;background-repeat:no-repeat;transition:opacity .16s}
 .mode-option:not(.is-active):hover::before{opacity:.45}
@@ -219,19 +219,17 @@ body[data-mode=zombies] .hero-word>span{color:color-mix(in srgb,#e4eaee,#892b2c 
 .option-tags{color:var(--mute);transition:color .3s}
 .mode-option.is-active .option-tags{color:var(--paper-2)}
 .option-tags i{width:3px;height:3px;background:currentColor;border-radius:0}
-.mode-progress{position:absolute;left:28px;right:28px;bottom:14px;height:4px;overflow:hidden;border-radius:0;background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 10px)}
-.mode-progress>i{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--mode-color) 0 6px,transparent 6px 10px);clip-path:inset(0 100% 0 0)}
-.mode-option.is-active .mode-progress{background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--mode-color) 18%,transparent) 0 6px,transparent 6px 10px)}
 
 /* Living sculk grows below the labels, following connected cells from the lower corners. */
 .mode-option,.record-switch .key{isolation:isolate}
 .mode-sculk{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
 .mode-option .option-no,.mode-option .option-copy,.record-switch .switch-label{position:relative;z-index:2}
-.mode-option .mode-progress{z-index:3}
 .mode-option::before{z-index:4}
 .record-switch .key::before{z-index:3}
 .record-switch .mode-sculk{opacity:.65}
-.mode-option.is-active{box-shadow:inset 0 -4px 0 #02070b,0 0 18px color-mix(in srgb,var(--mode-color) 7%,transparent)}
+.mode-option.is-active{box-shadow:inset 0 -4px 0 #02070b,0 0 22px color-mix(in srgb,var(--mode-color) 18%,transparent)}
+.mode-option.is-active.is-sculk-confirming{box-shadow:inset 0 -4px 0 #02070b,inset 0 0 16px color-mix(in srgb,var(--mode-color) 9%,transparent),0 0 30px color-mix(in srgb,var(--mode-color) 34%,transparent)}
+.record-switch .key.is-active.is-sculk-confirming{box-shadow:inset 0 -3px 0 #90aaa0,inset 0 0 12px color-mix(in srgb,var(--glow) 55%,transparent)}
 
 /* Shared section type */
 .section{position:relative;padding:clamp(72px,9vw,136px) var(--pad)}
@@ -387,7 +385,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
 .record-visual.is-pixel-pulse .corner-marks{animation:pixel-response .36s steps(3,end)}
 @keyframes pixel-response{0%{opacity:.2}25%{opacity:1}65%{opacity:.35}100%{opacity:.8}}
 
-@media(min-width:1800px){.mode-option{padding:24px 38px}}
+@media(min-width:1800px){.mode-option{padding:20px 38px}}
 @media(max-width:1200px){
   .header-status{display:none}
   .hero-copy{width:56%}
@@ -433,12 +431,11 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   .mode-console{padding:8px}
   .mode-options{gap:6px}
 
-  .mode-option{flex-direction:column;align-items:flex-start;gap:12px;min-height:118px;padding:18px 10px 26px}
+  .mode-option{flex-direction:column;align-items:flex-start;gap:12px;min-height:108px;padding:18px 10px}
 
   .option-no{font-size:28px}
   .option-en{display:none}
   .option-copy strong{font-size:15px;white-space:nowrap}
-  .mode-progress{left:12px;right:12px;bottom:12px}
   .section-heading{align-items:center}
   .section h2{font-size:clamp(28px,8vw,36px)}
   .record-count{font-size:44px}
