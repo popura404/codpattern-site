@@ -193,8 +193,9 @@ ul{padding:0;list-style:none}
 
 .hero-word{position:absolute;z-index:3;left:var(--pad);bottom:clamp(18px,3.4vh,34px);padding-top:4px;pointer-events:none}
 /* The display subset's Latin kerning pushes letters apart; set it solid. */
-.hero-word>span{display:block;font-family:var(--display);font-weight:800;font-size:clamp(70px,9.4vw,180px);line-height:.92;letter-spacing:-.02em;font-kerning:none;white-space:nowrap;color:color-mix(in srgb,#e4eaee,#892b2c var(--zombie-theme))}
-/* The word follows the shell's registered theme progress, including interrupted transitions. */
+.hero-word>span{display:block;font-family:var(--display);font-weight:800;font-size:clamp(70px,9.4vw,180px);line-height:.92;letter-spacing:-.02em;font-kerning:none;white-space:nowrap;color:#e4eaee}
+/* Only Zombies follows the shell's red curve; other words always settle back to white. */
+body[data-mode=zombies] .hero-word>span{color:color-mix(in srgb,#e4eaee,#892b2c var(--zombie-theme))}
 .hero-word>span.is-long{font-size:clamp(46px,6.2vw,120px)}
 .intro-pending .hero-copy>*,.intro-pending .hero-word,.intro-pending .lab-ring{opacity:0}
 
