@@ -2,6 +2,9 @@
 @font-face{font-family:"CP Display";src:url("assets/codpattern-display.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap}
 @font-face{font-family:"CP Interface";src:url("assets/noto-sans-sc-400.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap}
 
+@font-face{font-family:"CP Mods";src:url("assets/mod-intro.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"CP Mod Title";src:url("assets/mod-title.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap}
+
 @property --zombie-theme{syntax:"<percentage>";inherits:true;initial-value:0%}
 
 /* Tokens: Rhine-style flat navy base, sculk signal cyan, per-mode accent from the mod source. */
@@ -63,9 +66,6 @@ body{
   --image-tint:color-mix(in srgb,#0c2638,#49202b var(--zombie-theme));
   --glass-mid:color-mix(in srgb,#1b313f,#392129 var(--zombie-theme));
   --glass-low:color-mix(in srgb,#050e18,#170b10 var(--zombie-theme));
-  --device-high:color-mix(in srgb,#14263a,#351b24 var(--zombie-theme));
-  --device-mid:color-mix(in srgb,#0e1b2a,#28141c var(--zombie-theme));
-  --device-low:color-mix(in srgb,#0b1622,#1d0e15 var(--zombie-theme));
   --footer:color-mix(in srgb,#03070d,#0d0609 var(--zombie-theme));
   --dialog-high:color-mix(in srgb,#1e3242,#38232b var(--zombie-theme));
   --dialog-low:color-mix(in srgb,#060e18,#160c10 var(--zombie-theme));
@@ -305,43 +305,28 @@ body[data-mode=zombies] .hero-word>span{color:color-mix(in srgb,#e4eaee,#892b2c 
 .dispatch-bottom{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:20px;font-size:11px;color:var(--mute)}
 .dispatch-bottom .barcode{flex:none;width:54px;height:18px;opacity:.45}
 
-/* A block-built deployment terminal with an inset phosphor display. */
-.deployment-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(40px,9vw,160px);align-items:center;overflow:hidden;padding-bottom:clamp(150px,13vw,200px);background:radial-gradient(ellipse 50% 60% at 78% 50%,color-mix(in srgb,var(--theme-signal) 8%,transparent),transparent 70%),var(--void);border-top:1px solid var(--line)}
-.deployment-section::before{content:"";position:absolute;right:var(--pad);top:18%;width:min(480px,40vw);height:66%;pointer-events:none;background:linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/32px 32px,linear-gradient(var(--line) 1px,transparent 1px) 0 0/32px 32px;mask-image:linear-gradient(90deg,transparent,#000 80%);opacity:.45}
-@keyframes radar-rotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.deployment-heading h2{font-size:clamp(40px,4.4vw,80px);line-height:1.25}
-.device{position:relative;z-index:1;padding:clamp(24px,2.6vw,36px);border:2px solid var(--line-2);border-radius:0;clip-path:var(--panel-corners);background:var(--panel);box-shadow:inset 4px 4px 0 color-mix(in srgb,var(--edge) 5%,transparent),inset -4px -4px 0 #03090d;transition:border-color .16s}
-.device:hover{border-color:color-mix(in srgb,var(--sculk) 45%,transparent)}
-.device-top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--tech);font-size:11px;letter-spacing:.22em;color:var(--mute)}
-.device-ready{display:flex;align-items:center;gap:9px;color:var(--paper-2)}
-.device-ready .led{--c:var(--sculk)}
-.lcd{position:relative;margin-top:18px;padding:22px 24px 24px;border:2px solid #02090d;border-radius:0;background:#06171c;box-shadow:0 0 0 1px color-mix(in srgb,var(--sculk) 20%,transparent),inset 4px 4px 0 #030e13;overflow:hidden}
-.lcd::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(0,0,0,.1) 0 1px,transparent 1px 4px);pointer-events:none;opacity:.5}
-.lcd-label{display:block;font-family:var(--tech);font-size:11px;letter-spacing:.32em;color:rgba(var(--sculk-rgb),.72)}
-.lcd strong{display:block;margin-top:8px;font-family:var(--mono);font-weight:400;font-size:clamp(48px,4.6vw,72px);line-height:1.1;letter-spacing:-.06em;color:#a3e5d5;text-shadow:3px 3px 0 #123e3b}
-.device:hover .lcd strong{color:#b9f2df}
-.environment-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.environment-specs li{padding:12px;font-family:var(--mono);font-size:12px;letter-spacing:0;color:var(--paper-2);border-radius:0;border:1px solid var(--line);background:var(--void);box-shadow:inset 0 -3px 0 #02080c;transition:color .16s,border-color .16s}
-.environment-specs li:hover{color:var(--paper);border-color:rgba(var(--sculk-rgb),.35)}
-.copy-button{width:100%;margin-top:22px;border-radius:0;overflow:hidden;position:relative}
-.copy-button::after{content:none}
-.copy-button:hover::after{content:none}
-.copy-button.copied{animation:key-pulse .36s steps(3,end)}
-@keyframes key-pulse{0%,100%{opacity:1}35%{opacity:.65}65%{opacity:.9}}
-.copy-button svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:miter}
-.copy-button:hover svg{transform:none}
-.copy-status{display:block;min-height:22px;margin-top:10px;font-size:13px;color:var(--sculk);transition:opacity .3s}
-.device details{margin-top:4px;border-top:1px solid rgba(220,235,245,.07)}
-.device summary{display:flex;justify-content:space-between;align-items:center;padding-top:16px;font-size:14px;color:var(--paper-2);list-style:none;cursor:pointer;transition:color .3s}
-.device summary::-webkit-details-marker{display:none}
-.device summary:hover{color:var(--paper)}
-.details-indicator{position:relative;width:11px;height:11px}
-.details-indicator::before,.details-indicator::after{content:"";position:absolute;top:5px;left:0;width:12px;height:2px;background:currentColor;transition:transform .12s steps(2,end)}
-.details-indicator::after{transform:rotate(90deg)}
-details[open] .details-indicator::after{transform:rotate(0)}
-.deployment-notes{padding-top:12px}
-.deployment-notes p{font-size:14px;line-height:1.8;color:var(--paper-2)}
-.deployment-notes p+p{margin-top:8px}
+/* Two field reports introduce the core mod and its cooperative addon. */
+.mod-section{overflow:hidden;padding-bottom:clamp(150px,13vw,200px);background:var(--void);border-top:1px solid var(--line);font-family:"CP Mods",var(--sans)}
+.site-header nav a[href="#deployment"]{font-family:"CP Mods",var(--sans)}
+.mod-heading{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1fr);gap:clamp(32px,5vw,80px);align-items:end;margin-bottom:48px}
+.mod-heading h2{font-family:"CP Mod Title",var(--display);font-size:clamp(40px,4.4vw,80px);line-height:1.25}
+.mod-lead{max-width:35em;padding-bottom:8px}
+.mod-lead p{font-size:clamp(16px,1.4vw,20px);line-height:1.9;color:var(--paper-2)}
+.mod-lead>span{display:block;margin-top:20px;font-family:var(--tech);font-size:12px;letter-spacing:.1em;color:var(--mute)}
+.mod-entry{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1fr);gap:clamp(32px,5vw,80px);align-items:start;padding:40px 0;border-top:1px solid var(--line-2)}
+.mod-identity,.mod-copy{min-width:0}
+.mod-identity h3{font-family:var(--tech);font-weight:700;font-size:clamp(26px,2.5vw,40px);line-height:1.15;letter-spacing:-.02em;color:var(--paper)}
+.mod-identity h3 span{display:inline-block}
+.mod-role{margin-top:10px;font-size:13px;letter-spacing:.08em;color:var(--paper-2)}
+.mod-description{max-width:40em;font-size:15px;line-height:1.9;color:var(--paper-2)}
+.mod-features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px;margin-top:22px;font-size:14px;color:var(--paper)}
+.mod-features li{position:relative;padding-left:14px}
+.mod-features li::before{content:"";position:absolute;left:0;top:.7em;width:4px;height:4px;background:var(--theme-signal)}
+.mod-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.mod-footer>p{font-size:12px;line-height:1.8;color:var(--mute)}
+.mod-link{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-size:14px;color:var(--paper);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:6px;transition:color .16s,text-decoration-color .16s}
+.mod-link:hover{color:var(--sculk);text-decoration-color:var(--sculk)}
+.mod-link>span[aria-hidden]{font-family:var(--tech);font-size:20px}
 #sculk-floor{position:absolute;left:0;right:0;bottom:0;width:100%;height:110px;pointer-events:none}
 
 .site-footer{display:flex;align-items:center;gap:30px;padding:30px var(--pad);background:var(--footer);border-top:1px solid color-mix(in srgb,var(--theme-signal) 20%,transparent)}
@@ -374,7 +359,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
 .brand-mark .brand-frame{fill:none;stroke:var(--brand-ink);stroke-width:2}
 .lab-ring .rl-arc,.lab-ring .rl-accent{fill:var(--glow);stroke:none;opacity:.8;transition:fill 1s}
 .feature-strip svg{overflow:visible}
-.record-body,.device,.dispatch{background:var(--sculk-edge),var(--panel)}
+.record-body,.dispatch{background:var(--sculk-edge),var(--panel)}
 .key:focus-visible{outline-offset:-5px;outline-color:currentColor}
 .mode-option:focus-visible{outline-offset:-5px}
 .mode-option.is-active{background:color-mix(in srgb,var(--mode-color) 7%,var(--panel));border-color:color-mix(in srgb,var(--mode-color) 42%,var(--panel))}
@@ -404,8 +389,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   .record-specs dd{font-size:13px}
   .world-section{grid-template-columns:1fr;gap:36px}
   .world-intro{max-width:40em}
-  .deployment-section{grid-template-columns:1fr;gap:44px}
-  .deployment-section::before{top:auto;bottom:0;width:80vw;height:60%}
+  .mod-heading,.mod-entry{gap:32px}
 }
 @media(max-width:680px){
   :root{--header-h:64px;--pad:22px}
@@ -451,10 +435,12 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   .dispatch-records>div{grid-template-columns:1fr;gap:10px;padding:20px 0}
   .world-intro{font-size:14px}
   .feature-strip li{flex-direction:column;align-items:flex-start;gap:10px;padding:20px 0 20px 14px;font-size:13px}
-  .deployment-heading h2{font-size:clamp(36px,10vw,46px)}
-  .device{border-radius:0}
-  .environment-specs{grid-template-columns:1fr 1fr}
-  .environment-specs li:last-child{grid-column:1/-1}
+  .mod-heading{grid-template-columns:1fr;gap:24px;margin-bottom:32px}
+  .mod-heading h2{font-size:clamp(36px,10vw,46px)}
+  .mod-lead{padding-bottom:0}
+  .mod-lead>span{font-size:11px;letter-spacing:.06em}
+  .mod-entry{grid-template-columns:1fr;gap:24px;padding:32px 0}
+  .mod-features{gap:10px 14px;font-size:13px}
   .site-footer{flex-wrap:wrap;gap:16px 20px}
   .footer-note{margin-left:0;order:3;width:100%;font-size:9px;letter-spacing:.18em}
   .back-top{margin-left:auto}

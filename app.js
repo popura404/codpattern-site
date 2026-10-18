@@ -295,18 +295,6 @@ $('.record-open').addEventListener('click',openVisual);
 $('#close-visual').addEventListener('click',() => dialog.close());
 dialog.addEventListener('click',(event) => {if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 dialog.addEventListener('close',() => {document.body.classList.remove('dialog-open');syncClock();});
-$('#copy-environment').addEventListener('click',async() => {
-  const btn = $('#copy-environment');
-  btn.classList.add('copied');
-  setTimeout(() => btn.classList.remove('copied'), 600);
-  const content='[COD: PATTERN 部署清单]\n运行环境：Minecraft 1.20.1 / Java 17\n模组加载：Forge 47+（构建版本 47.4.0）\n武器核心：TaCZ (Timeless and Classics Zero) 1.1.6+\n玩法核心：COD Pattern 主模组\n可选扩展：COD Pattern Zombies 独立附属\n* 客户端与服务端模组文件须保持一致。';
-  const legacyCopy=() => {const input=document.createElement('textarea');input.value=content;input.style.cssText='position:fixed;opacity:0';document.body.append(input);input.select();const success=document.execCommand('copy');input.remove();if(!success)throw new Error('Clipboard unavailable');};
-  try {
-    if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(content).catch(legacyCopy);
-    else legacyCopy();
-    $('#copy-status').textContent='已复制，准备出发。';
-  }catch{$('#copy-status').textContent='复制不可用，请选取上方环境信息。';}
-});
 
 // Sculk: a pixel band grown from a seeded height field. Souls pulse, react to the pointer,
 // and light up as vibration waves pass. Drawn at 30fps (20 on small screens), only while visible.
