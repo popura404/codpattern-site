@@ -319,9 +319,10 @@ body[data-mode=zombies] .hero-word>span{color:color-mix(in srgb,#e4eaee,#892b2c 
 .mod-identity h3 span{display:inline-block}
 .mod-role{margin-top:10px;font-size:13px;letter-spacing:.08em;color:var(--paper-2)}
 .mod-description{max-width:40em;font-size:15px;line-height:1.9;color:var(--paper-2)}
-.mod-features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px;margin-top:22px;font-size:14px;color:var(--paper)}
-.mod-features li{position:relative;padding-left:14px}
-.mod-features li::before{content:"";position:absolute;left:0;top:.7em;width:4px;height:4px;background:var(--theme-signal)}
+.mod-details{display:grid;gap:22px;margin-top:28px;font-size:14px;line-height:1.9}
+.mod-details>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:20px}
+.mod-details dt{color:var(--paper)}
+.mod-details dd{color:var(--paper-2)}
 .mod-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
 .mod-footer>p{font-size:12px;line-height:1.8;color:var(--mute)}
 .mod-link{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-size:14px;color:var(--paper);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:6px;transition:color .16s,text-decoration-color .16s}
@@ -390,6 +391,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   .world-section{grid-template-columns:1fr;gap:36px}
   .world-intro{max-width:40em}
   .mod-heading,.mod-entry{gap:32px}
+  .mod-details>div{grid-template-columns:1fr;gap:6px}
 }
 @media(max-width:680px){
   :root{--header-h:64px;--pad:22px}
@@ -440,7 +442,6 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
   .mod-lead{padding-bottom:0}
   .mod-lead>span{font-size:11px;letter-spacing:.06em}
   .mod-entry{grid-template-columns:1fr;gap:24px;padding:32px 0}
-  .mod-features{gap:10px 14px;font-size:13px}
   .site-footer{flex-wrap:wrap;gap:16px 20px}
   .footer-note{margin-left:0;order:3;width:100%;font-size:9px;letter-spacing:.18em}
   .back-top{margin-left:auto}
