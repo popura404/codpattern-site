@@ -8,6 +8,7 @@
 :root{
   --void:#050a12;--abyss:#08111c;--panel:#0b1724;
   --paper:#e4eaee;--paper-2:#b6c3cd;--mute:#7c90a2;--faint:#435668;
+  --brand-ink:#e4eaee;--brand-muted:#b6c3cd;
   --line:rgba(188,210,226,.12);--line-2:rgba(188,210,226,.24);
   --sculk:#2ad4c6;--sculk-rgb:42,212,198;
   --accent:#62f08a;--accent-rgb:98,240,138;--ink:#aaf6bf;--glow:#62f08a;
@@ -115,13 +116,14 @@ ul{padding:0;list-style:none}
 
 /* Header */
 .site-header{position:sticky;top:0;z-index:40;height:var(--header-h);display:flex;align-items:center;gap:clamp(20px,3vw,44px);padding:0 var(--pad);background:color-mix(in srgb,var(--void) 97%,transparent);border-bottom:1px solid var(--line-2);box-shadow:0 3px 0 #02080b}
-.brand{display:flex;align-items:center;gap:14px;margin-right:auto}
+/* Brand colors stay light, independent of the changing battlefield theme. */
+.brand{display:flex;align-items:center;gap:14px;margin-right:auto;color:var(--brand-ink)}
 .brand-mark{flex:none;width:40px;height:40px}
-.brand-mark path{fill:var(--paper)}
+.brand-mark path{fill:var(--brand-ink)}
 .brand-mark .brand-node{fill:var(--sculk)}
 .brand-word{font-family:var(--tech);font-weight:700;font-size:21px;line-height:1;letter-spacing:.02em}
-.brand-colon{padding:0 3px;color:var(--paper-2)}
-.brand-word small{display:block;margin-top:6px;font-weight:400;font-size:9.5px;letter-spacing:.34em;color:var(--mute)}
+.brand-colon{padding:0 3px;color:var(--brand-muted)}
+.brand-word small{display:block;margin-top:6px;font-weight:400;font-size:9.5px;letter-spacing:.34em;color:var(--brand-muted)}
 .site-header nav{display:flex;gap:34px}
 .site-header nav a{position:relative;padding:6px 0;font-size:14px;color:var(--paper-2);transition:color .25s}
 .site-header nav a::after,.text-link::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:repeating-linear-gradient(90deg,var(--sculk) 0 4px,transparent 4px 8px);transform:scaleX(0);transform-origin:left;transition:transform .16s steps(5,end)}
@@ -343,7 +345,7 @@ details[open] .details-indicator::after{transform:rotate(0)}
 #sculk-floor{position:absolute;left:0;right:0;bottom:0;width:100%;height:110px;pointer-events:none}
 
 .site-footer{display:flex;align-items:center;gap:30px;padding:30px var(--pad);background:var(--footer);border-top:1px solid color-mix(in srgb,var(--theme-signal) 20%,transparent)}
-.footer-brand{font-family:var(--tech);font-weight:700;font-size:20px;letter-spacing:.02em}
+.footer-brand{font-family:var(--tech);font-weight:700;font-size:20px;letter-spacing:.02em;color:var(--brand-ink)}
 .footer-note{margin-left:auto;font-family:var(--tech);font-size:10px;letter-spacing:.26em;color:var(--faint)}
 .back-top{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--paper-2);transition:color .3s,transform .3s var(--spring)}
 .back-top:hover{color:var(--sculk)}
@@ -369,7 +371,7 @@ dialog>p{margin-top:12px;font-family:var(--tech);font-size:10px;letter-spacing:.
 
 
 /* A small connected vein, shared by all terminal surfaces. */
-.brand-mark .brand-frame{fill:none;stroke:var(--paper);stroke-width:2}
+.brand-mark .brand-frame{fill:none;stroke:var(--brand-ink);stroke-width:2}
 .lab-ring .rl-arc,.lab-ring .rl-accent{fill:var(--glow);stroke:none;opacity:.8;transition:fill 1s}
 .feature-strip svg{overflow:visible}
 .record-body,.device,.dispatch{background:var(--sculk-edge),var(--panel)}

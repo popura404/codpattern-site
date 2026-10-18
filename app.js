@@ -16,6 +16,7 @@ const frames = $$('.hero-frame');
 const selectors = $$('[data-select-mode]');
 const modeOptions = $('.mode-options');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const entrance = window.codpatternIntro;
 const finePointer = matchMedia('(pointer:fine)');
 const modeTiming=Object.freeze({
   flash:650*1.3,
@@ -80,7 +81,7 @@ function loadFrame(index) {
   result.catch(() => loading.delete(index));
   return result;
 }
-function playAllowed() { return !paused && inView && !document.hidden && !focused && !dialog.open && !changing; }
+function playAllowed() { return !entrance?.active && !paused && inView && !document.hidden && !focused && !dialog.open && !changing; }
 function remainingCycleTime(time=performance.now()) {
   return Math.max(0,cycleRemaining-(clockRunning?time-cycleStartedAt:0));
 }
@@ -474,7 +475,7 @@ const sculk = (() => {
   function frame(time) {
     raf=0;
     if(reduced.matches){resetParallax();resetScan();draw(time,true);return;}
-    if(!inView||document.hidden)return;
+    if(!inView||document.hidden||entrance?.active)return;
     const previous=lastFrame||time-16.667,elapsed=time-previous;
     const dt=Math.min(elapsed/16.667,2);lastFrame=time;
     // Advance the pulse phase continuously so changing tempo never jumps the lights.
@@ -495,7 +496,7 @@ const sculk = (() => {
   }
   function sync() {
     if(raf)cancelAnimationFrame(raf);raf=0;lastFrame=0;
-    if(inView&&!document.hidden&&!reduced.matches)raf=requestAnimationFrame(frame);
+    if(inView&&!document.hidden&&!reduced.matches&&!entrance?.active)raf=requestAnimationFrame(frame);
     else {
       radarInputs.length=0;radarTargetX=targetX;radarTargetY=targetY;
       if(reduced.matches){resetParallax();resetScan();draw(performance.now(),true);}
@@ -595,6 +596,7 @@ if(!reduced.matches)document.documentElement.classList.add('intro-pending');
 function intro() {
   settleRing();
   document.documentElement.classList.remove('intro-pending');
+  resetClock();sculk.sync();
   if(reduced.matches)return;
   sculk.grow();
   $('.hero h1').animate([{opacity:0},{opacity:1}],{duration:240,delay:60,easing:'steps(4,end)',fill:'backwards'});
@@ -603,7 +605,11 @@ function intro() {
   $('.rl-main').animate([{strokeDashoffset:360},{strokeDashoffset:0}],{duration:600,delay:80,easing:'steps(12,end)',fill:'backwards'});
   ring.animate([{opacity:0},{opacity:1}],{duration:300,delay:60,easing:'steps(5,end)',fill:'backwards'});
 }
-Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1800))]).then(intro);
+// The entrance already gives fonts time to settle. Skipping it must reveal content immediately.
+const introReady=entrance?.active ? entrance.revealed : reduced.matches ? Promise.resolve()
+  : Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1800))]);
+introReady.then(intro);
+entrance?.ready.then(()=>{resetClock();sculk.sync();});
 const idle=window.requestIdleCallback||((callback)=>setTimeout(callback,800));
 idle(()=>{loadFrame(1).catch(()=>{});loadFrame(2).catch(()=>{});},{timeout:1800});
 

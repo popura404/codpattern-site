@@ -10,10 +10,30 @@
   <link rel="preload" href="assets/codpattern-display.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" as="image" href="assets/frontline_preview.webp">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="sculk-intro.css">
+  <script src="sculk-intro.js"></script>
   <script src="app.js" defer></script>
   <script src="mode-sculk.js" defer></script>
 </head>
 <body data-mode="frontline">
+  <dialog class="sculk-intro" id="sculk-intro" aria-labelledby="sculk-intro-title" aria-describedby="sculk-intro-description" tabindex="-1" autofocus>
+    <canvas class="sculk-intro-field" aria-hidden="true"></canvas>
+    <div class="sculk-intro-top">
+      <span class="sculk-intro-signature">REGRESSION<span>回归</span></span>
+    </div>
+    <div class="sculk-intro-copy">
+      <svg class="sculk-intro-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M16 4h32v8h8v8h4v24h-4v8h-8v8H16v-8H8v-8H4V20h4v-8h8z"/><path class="sculk-intro-glyph" d="M18 20h9v24h-9zm16 0h13v9H34zm0 16h9v8h-9z"/><path class="sculk-intro-node" d="M47 8h6v6h-6z"/></svg>
+      <h2 id="sculk-intro-title">COD<span>:</span>PATTERN</h2>
+      <p class="sculk-intro-subtitle">回归 · 行动档案</p>
+      <div class="sculk-intro-readout" aria-hidden="true">
+        <div><span class="sculk-intro-label">静候回响</span><span class="sculk-intro-status">微光未眠</span></div>
+        <span class="sculk-intro-count">00<span>%</span></span>
+      </div>
+      <div class="sculk-intro-stages" aria-hidden="true"><span class="is-current">微光</span><span>余响</span><span>归途</span></div>
+    </div>
+    <div class="sculk-intro-bottom"><p aria-hidden="true">有些回应，来自更深处。</p><span aria-hidden="true">ECHOES / BELOW</span></div>
+    <p id="sculk-intro-description" class="sr-only">正在播放入场动画，约五秒半后自动进入。按 Escape 可立即进入。</p>
+  </dialog>
   <a class="skip-link" href="#modes">跳转到模式选择</a>
   <header class="site-header">
     <a href="#top" class="brand" aria-label="COD Pattern 首页">
